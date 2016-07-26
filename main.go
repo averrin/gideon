@@ -52,7 +52,7 @@ func (app *Application) run() int {
 		"flurries":       "\uf07b",
 		//"fog":            "\uf014",
 		"fog":            "\uf003",
-		"hazy":           "\uf07b",
+		"hazy":           "\uf0b6",
 		"mostlycloudy":   "\uf013",
 		"mostlysunny":    "\uf00d",
 		"partlysunny":    "\uf07b",
@@ -161,6 +161,7 @@ func (app *Application) initWeather() {
 	go func() {
 		for {
 			time.Sleep(10 * time.Minute)
+			log.Print("Update")
 			weather = GetWeather()
 			text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
 			if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
