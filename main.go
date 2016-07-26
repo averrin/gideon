@@ -17,6 +17,7 @@ import (
 const WUNDER = "http://api.wunderground.com/api/%s/conditions/q/%s.json"
 const APIKEY = "bddbf374b57d9a80"
 const LOCATION = "ru/Vsevolozhsk"
+const FONT_SIZE = 24
 
 var weather CurrentObservation
 
@@ -49,7 +50,8 @@ func (app *Application) run() int {
 		"chancesnow":     "\uf07b",
 		"chancetstorms":  "\uf07b",
 		"flurries":       "\uf07b",
-		"fog":            "\uf07b",
+		//"fog":            "\uf014",
+		"fog":            "\uf003",
 		"hazy":           "\uf07b",
 		"mostlycloudy":   "\uf013",
 		"mostlysunny":    "\uf00d",
@@ -63,7 +65,7 @@ func (app *Application) run() int {
 	w := 800
 	h := 600
 	window, err := sdl.CreateWindow("Gideon", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		w, h, sdl.WINDOW_SHOWN)
+		w, h, sdl.WINDOW_FULLSCREEN_DESKTOP)
 	if err != nil {
 		panic(err)
 	}
@@ -82,9 +84,9 @@ func (app *Application) run() int {
 	sdl.Delay(5)
 	app.Window.UpdateSurface()
 
-	LoadFonts(18)
+	LoadFonts(FONT_SIZE)
 	app.initWeather()
-	app.initPinger()
+        //app.initPinger()
 	go app.Scene.Run()
 
 	running := true
@@ -114,27 +116,20 @@ func (app *Application) run() int {
 }
 
 func (app *Application) initWeather() {
-	weather = GetWeather()
 	white := sdl.Color{250, 250, 250, 1}
+	weather = GetWeather()
+        blank := CurrentObservation{}
+        if weather == blank {
+	rectI := sdl.Rect{30, 0, 100, 100}
+	icon := NewText(&rectI, "\uf07b", white)
+	rectW := sdl.Rect{10, 90  + (FONT_SIZE + 2)*1, 100, 20}
+	no := NewText(&rectW, "Weather unavailable.", white)
+	l, _ := app.Scene.AddLayer("info")
+	l.AddItem(&icon)
+	l.AddItem(&no)
+        return
+        }
 	//●⬤
-
-	rect := sdl.Rect{10, 90, 100, 20}
-	text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
-	if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
-		text = fmt.Sprintf("Temp: %v°", weather.TempC)
-	}
-	temp := NewText(&rect, text, white)
-	temp.SetRules([]HighlightRule{HighlightRule{5, -1, sdl.Color{200, 200, 100, 1}, boldFont}})
-
-	rectH := sdl.Rect{10, 110, 100, 20}
-	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
-	hum := NewText(&rectH, textH, white)
-	hum.SetRules([]HighlightRule{HighlightRule{9, -1, sdl.Color{100, 133, 167, 1}, boldFont}})
-
-	rectW := sdl.Rect{10, 130, 100, 20}
-	textW := fmt.Sprintf("%v", weather.Weather)
-	wea := NewText(&rectW, textW, white)
-	wea.SetRules([]HighlightRule{HighlightRule{0, -1, white, boldFont}})
 
 	rectI := sdl.Rect{30, 0, 100, 100}
 	textI := icons[weather.Icon]
@@ -144,6 +139,24 @@ func (app *Application) initWeather() {
 	dir := filepath.Join(cwd, "fonts")
 	fontIcons, _ := ttf.OpenFont(path.Join(dir, "weathericons-regular-webfont.ttf"), 60)
 	icon.SetFont(fontIcons)
+	rect := sdl.Rect{10, 90, 100, FONT_SIZE + 2}
+	text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
+	if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
+		text = fmt.Sprintf("Temp: %v°", weather.TempC)
+	}
+	temp := NewText(&rect, text, white)
+	temp.SetRules([]HighlightRule{HighlightRule{5, -1, sdl.Color{200, 200, 100, 1}, boldFont}})
+
+	rectH := sdl.Rect{10, 90 + (FONT_SIZE + 2)*1, 100, 20}
+	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
+	hum := NewText(&rectH, textH, white)
+	hum.SetRules([]HighlightRule{HighlightRule{9, -1, sdl.Color{100, 133, 167, 1}, boldFont}})
+
+	rectW := sdl.Rect{10, 90  + (FONT_SIZE + 2)*2, 100, 20}
+	textW := fmt.Sprintf("%v", weather.Weather)
+	wea := NewText(&rectW, textW, white)
+	wea.SetRules([]HighlightRule{HighlightRule{0, -1, white, boldFont}})
+
 
 	go func() {
 		for {
