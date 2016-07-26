@@ -183,13 +183,13 @@ func (app *Application) initWeather() {
 }
 
 func (app *Application) initPinger() {
-	rect := sdl.Rect{10, 90  + (FONT_SIZE + 2)*3, 100, 20}
+	rect := sdl.Rect{10, 90  + (FONT_SIZE + 2)*4, 100, 20}
 	text := "\uf111"
 	red := sdl.Color{246, 61, 28, 1}
 	green := sdl.Color{124, 221, 23, 1}
 	yellow := sdl.Color{210, 160, 62, 1}
 	icon := NewText(&rect, text, yellow)
-	label := NewText(&sdl.Rect{40,  90  + (FONT_SIZE + 2)*3, 100, 20}, "Network", sdl.Color{250, 250, 250, 1})
+	label := NewText(&sdl.Rect{40,  90  + (FONT_SIZE + 2)*4, 100, 20}, "Network", sdl.Color{250, 250, 250, 1})
 
 	go func() {
 		for {
@@ -218,8 +218,10 @@ func (app *Application) initPinger() {
 
 func Ping() bool {
 	url := "http://google.com"
+	fmt.Print(".")
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != 200 {
+		fmt.Print("x")
 		return false
 	}
 	defer resp.Body.Close()
