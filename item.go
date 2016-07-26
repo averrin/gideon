@@ -197,6 +197,7 @@ type Text struct {
 	Color     sdl.Color
 	Font      *ttf.Font
 	NeedClear bool
+	Rules     []HighlightRule
 }
 
 func NewText(rect *sdl.Rect, text string, color sdl.Color) Text {
@@ -224,19 +225,99 @@ func (item *Text) SetFont(font *ttf.Font) {
 	item.Changed = true
 }
 
+func (item *Text) SetRules(rules []HighlightRule) {
+	item.Rules = rules
+	item.Changed = true
+}
+
 func (item *Text) Draw() {
 	if item.NeedClear {
 		item.Clear()
 	}
-	s := item.ParentSurface
-	message, err := item.Font.RenderUTF8_Blended(item.Text, item.Color)
+	// s := item.ParentSurface
+	// message, err := item.Font.RenderUTF8_Blended(item.Text, item.Color)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer message.Free()
+	// srcRect := sdl.Rect{}
+	// message.GetClipRect(&srcRect)
+	// message.Blit(&srcRect, s, item.GetRect())
+	item.DrawColoredText()
+	item.Changed = false
+	item.LastRects = append(item.LastRects, item.Rect.Rect)
+}
+
+// DrawText is
+func (item *Text) DrawText(text string, rect *sdl.Rect, color sdl.Color, font *ttf.Font) {
+	if strings.TrimSpace(text) == "" {
+		return
+	}
+	// log.Println("DRAW:", text, colorName, fontName)
+	message, err := font.RenderUTF8_Blended(text, color)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer message.Free()
 	srcRect := sdl.Rect{}
 	message.GetClipRect(&srcRect)
-	message.Blit(&srcRect, s, item.GetRect())
-	item.Changed = false
-	item.LastRects = append(item.LastRects, item.Rect.Rect)
+	message.Blit(&srcRect, item.ParentSurface, rect)
+}
+
+// HighlightRule is highlighting rule
+type HighlightRule struct {
+	Start int
+	Len   int
+	Color sdl.Color
+	Font  *ttf.Font
+}
+
+// DrawColoredText is
+func (item *Text) DrawColoredText() {
+	text := item.Text
+	rect := item.Rect.Rect
+	color := item.Color
+	font := item.Font
+	rules := item.Rules
+	if len(rules) == 0 {
+		item.DrawText(text, rect, color, font)
+	} else {
+		var token string
+		for _, rule := range rules {
+			if rule.Start < 0 {
+				continue
+			}
+			// log.Println(text, rules[i].Start, len(text))
+			token = text[:rule.Start]
+			var tw int
+			if len(token) > 0 {
+				item.DrawText(token, rect, color, font)
+				tw, _, _ = font.SizeUTF8(token)
+				rect = &sdl.Rect{
+					X: rect.X + int32(tw),
+					Y: rect.Y,
+					W: rect.W - int32(tw),
+					H: rect.H,
+				}
+			}
+			text = text[rule.Start:]
+			l := rule.Len
+			if l > len(text) || l == -1 {
+				l = len(text)
+			}
+			token = text[:l]
+			item.DrawText(token, rect, rule.Color, rule.Font)
+			tw, _, _ = font.SizeUTF8(token)
+			rect = &sdl.Rect{
+				X: rect.X + int32(tw),
+				Y: rect.Y,
+				W: rect.W - int32(tw),
+				H: rect.H,
+			}
+			text = text[l:]
+		}
+		if len(token) > 0 {
+			item.DrawText(text, rect, color, font)
+		}
+	}
 }

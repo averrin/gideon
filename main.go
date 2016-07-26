@@ -54,8 +54,8 @@ func (app *Application) run() int {
 		"flurries":       "\uf07b",
 		"fog":            "\uf07b",
 		"hazy":           "\uf07b",
-		"mostlycloudy":   "\uf07b",
-		"mostlysunny":    "\uf07b",
+		"mostlycloudy":   "\uf013",
+		"mostlysunny":    "\uf00d",
 		"partlysunny":    "\uf07b",
 		"sleet":          "\uf07b",
 		"snow":           "\uf07b",
@@ -94,6 +94,7 @@ func (app *Application) run() int {
 		text = fmt.Sprintf("Temp: %v°", weather.TempC)
 	}
 	temp := NewText(&rect, text, white)
+	temp.SetRules([]HighlightRule{HighlightRule{5, -1, sdl.Color{200, 200, 100, 1}, boldFont}})
 
 	rectH := sdl.Rect{10, 110, 100, 20}
 	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
@@ -103,7 +104,7 @@ func (app *Application) run() int {
 	textW := fmt.Sprintf("%v", weather.Weather)
 	wea := NewText(&rectW, textW, white)
 
-	rectI := sdl.Rect{10, 0, 100, 100}
+	rectI := sdl.Rect{30, 0, 100, 100}
 	textI := icons[weather.Icon]
 	icon := NewText(&rectI, textI, white)
 
