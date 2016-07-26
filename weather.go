@@ -1,5 +1,13 @@
 package main
 
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+)
+
 type CurrentObservation struct {
 	UV                  string   `json:"UV"`
 	DewpointC           int      `json:"dewpoint_c"`
@@ -76,4 +84,16 @@ type WeatherResponse struct {
 		TermsofService string `json:"termsofService"`
 		Version        string `json:"version"`
 	} `json:"response"`
+}
+
+func GetWeather() CurrentObservation {
+	url := fmt.Sprintf(WUNDER, APIKEY, LOCATION)
+	log.Print(url)
+	response, _ := http.Get(url)
+	defer response.Body.Close()
+	var r WeatherResponse
+	body, _ := ioutil.ReadAll(response.Body)
+	json.Unmarshal(body, &r)
+	log.Print(string(body), "||", r.CurrentObservation.Icon)
+	return r.CurrentObservation
 }

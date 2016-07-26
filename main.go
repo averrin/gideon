@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -37,7 +35,6 @@ type Application struct {
 var icons map[string]string
 
 func (app *Application) run() int {
-	weather = GetWeather()
 	sdl.Init(sdl.INIT_EVERYTHING)
 	ttf.Init()
 
@@ -86,52 +83,8 @@ func (app *Application) run() int {
 	app.Window.UpdateSurface()
 
 	LoadFonts(18)
-	white := sdl.Color{250, 250, 250, 1}
-
-	rect := sdl.Rect{10, 90, 100, 20}
-	text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
-	if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
-		text = fmt.Sprintf("Temp: %v°", weather.TempC)
-	}
-	temp := NewText(&rect, text, white)
-	temp.SetRules([]HighlightRule{HighlightRule{5, -1, sdl.Color{200, 200, 100, 1}, boldFont}})
-
-	rectH := sdl.Rect{10, 110, 100, 20}
-	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
-	hum := NewText(&rectH, textH, white)
-
-	rectW := sdl.Rect{10, 130, 100, 20}
-	textW := fmt.Sprintf("%v", weather.Weather)
-	wea := NewText(&rectW, textW, white)
-
-	rectI := sdl.Rect{30, 0, 100, 100}
-	textI := icons[weather.Icon]
-	icon := NewText(&rectI, textI, white)
-
-	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	dir := filepath.Join(cwd, "fonts")
-	fontIcons, _ := ttf.OpenFont(path.Join(dir, "weathericons-regular-webfont.ttf"), 60)
-	icon.SetFont(fontIcons)
-
-	go func() {
-		time.Sleep(10 * time.Minute)
-		weather = GetWeather()
-		text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
-		if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
-			text = fmt.Sprintf("Temp: %v°", weather.TempC)
-		}
-		temp.SetText(text)
-		textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
-		hum.SetText(textH)
-		wea.SetText(weather.Weather)
-		icon.SetText(icons[weather.Icon])
-	}()
-
-	l, _ := app.Scene.AddLayer("info")
-	l.AddItem(&icon)
-	l.AddItem(&temp)
-	l.AddItem(&hum)
-	l.AddItem(&wea)
+	app.initWeather()
+	app.initPinger()
 	go app.Scene.Run()
 
 	running := true
@@ -160,14 +113,101 @@ func (app *Application) run() int {
 	return 0
 }
 
-func GetWeather() CurrentObservation {
-	url := fmt.Sprintf(WUNDER, APIKEY, LOCATION)
-	log.Print(url)
-	response, _ := http.Get(url)
-	defer response.Body.Close()
-	var r WeatherResponse
-	body, _ := ioutil.ReadAll(response.Body)
-	json.Unmarshal(body, &r)
-	log.Print(string(body), "||", r.CurrentObservation.Icon)
-	return r.CurrentObservation
+func (app *Application) initWeather() {
+	weather = GetWeather()
+	white := sdl.Color{250, 250, 250, 1}
+	//●⬤
+
+	rect := sdl.Rect{10, 90, 100, 20}
+	text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
+	if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
+		text = fmt.Sprintf("Temp: %v°", weather.TempC)
+	}
+	temp := NewText(&rect, text, white)
+	temp.SetRules([]HighlightRule{HighlightRule{5, -1, sdl.Color{200, 200, 100, 1}, boldFont}})
+
+	rectH := sdl.Rect{10, 110, 100, 20}
+	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
+	hum := NewText(&rectH, textH, white)
+	hum.SetRules([]HighlightRule{HighlightRule{9, -1, sdl.Color{100, 133, 167, 1}, boldFont}})
+
+	rectW := sdl.Rect{10, 130, 100, 20}
+	textW := fmt.Sprintf("%v", weather.Weather)
+	wea := NewText(&rectW, textW, white)
+	wea.SetRules([]HighlightRule{HighlightRule{0, -1, white, boldFont}})
+
+	rectI := sdl.Rect{30, 0, 100, 100}
+	textI := icons[weather.Icon]
+	icon := NewText(&rectI, textI, white)
+
+	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
+	dir := filepath.Join(cwd, "fonts")
+	fontIcons, _ := ttf.OpenFont(path.Join(dir, "weathericons-regular-webfont.ttf"), 60)
+	icon.SetFont(fontIcons)
+
+	go func() {
+		for {
+			time.Sleep(10 * time.Minute)
+			weather = GetWeather()
+			text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
+			if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
+				text = fmt.Sprintf("Temp: %v°", weather.TempC)
+			}
+			temp.SetText(text)
+			textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
+			hum.SetText(textH)
+			wea.SetText(weather.Weather)
+			icon.SetText(icons[weather.Icon])
+		}
+	}()
+
+	l, _ := app.Scene.AddLayer("info")
+	l.AddItem(&icon)
+	l.AddItem(&temp)
+	l.AddItem(&hum)
+	l.AddItem(&wea)
+}
+
+func (app *Application) initPinger() {
+	rect := sdl.Rect{30, 160, 100, 20}
+	text := "\uf111"
+	red := sdl.Color{246, 61, 28, 1}
+	green := sdl.Color{124, 221, 23, 1}
+	yellow := sdl.Color{210, 160, 62, 1}
+	icon := NewText(&rect, text, yellow)
+	label := NewText(&sdl.Rect{60, 160, 100, 20}, "Online", sdl.Color{250, 250, 250, 1})
+
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			icon.SetRules([]HighlightRule{HighlightRule{0, -1, yellow, font}})
+			online := Ping()
+			status := red
+			if online {
+				status = green
+			}
+			icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, font}})
+		}
+	}()
+
+	online := Ping()
+	status := red
+	if online {
+		status = green
+	}
+	icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, font}})
+
+	l, _ := app.Scene.AddLayer("pinger")
+	l.AddItem(&icon)
+	l.AddItem(&label)
+}
+
+func Ping() bool {
+	url := "http://google.com"
+	resp, err := http.Get(url)
+	if err != nil || resp.StatusCode != 200 {
+		return false
+	}
+	defer resp.Body.Close()
+	return true
 }
