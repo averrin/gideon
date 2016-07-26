@@ -92,6 +92,7 @@ func GetWeather() CurrentObservation {
 	log.Print(url)
 	response, err := http.Get(url)
         if err != nil {
+        	return w
         }
 
 	defer response.Body.Close()
