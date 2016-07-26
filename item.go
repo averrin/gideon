@@ -71,6 +71,7 @@ func NewImage(rect *sdl.Rect, path string, alt string) Image {
 		lw, _, _ := font.SizeUTF8(alt)
 		title := NewText(&sdl.Rect{int32(rect.W/2) - int32(lw/2), int32(rect.H/2) - int32(font.Height()/2), int32(lw), int32(font.Height())}, alt, sdl.Color{250, 250, 250, 1})
 		title.SetParentSurface(item.Image)
+		title.SetNeedClear(false)
 		title.Draw()
 	}
 	return *item
@@ -192,9 +193,10 @@ func (item *Rect) MoveTo(x int32, y int32) {
 
 type Text struct {
 	Rect
-	Text  string
-	Color sdl.Color
-	Font  *ttf.Font
+	Text      string
+	Color     sdl.Color
+	Font      *ttf.Font
+	NeedClear bool
 }
 
 func NewText(rect *sdl.Rect, text string, color sdl.Color) Text {
@@ -203,7 +205,13 @@ func NewText(rect *sdl.Rect, text string, color sdl.Color) Text {
 	item.Text = text
 	item.Color = color
 	item.Font = font
+	item.NeedClear = true
 	return *item
+}
+
+func (item *Text) SetNeedClear(need bool) {
+	item.NeedClear = need
+	item.Changed = true
 }
 
 func (item *Text) SetText(text string) {
@@ -217,6 +225,9 @@ func (item *Text) SetFont(font *ttf.Font) {
 }
 
 func (item *Text) Draw() {
+	if item.NeedClear {
+		item.Clear()
+	}
 	s := item.ParentSurface
 	message, err := item.Font.RenderUTF8_Blended(item.Text, item.Color)
 	if err != nil {
