@@ -84,6 +84,7 @@ func (app *Application) run() int {
 
 	LoadFonts(FONT_SIZE)
 	app.initWeather()
+	app.initClock()
 	pingStatus := app.initPinger()
 	go TestConnection(pingStatus)
 	go app.Scene.Run()
@@ -203,4 +204,17 @@ func (app *Application) initPinger() *Text {
 	l.AddItem(&icon)
 	l.AddItem(&label)
 	return &icon
+}
+
+func (app *Application) initClock() {
+	rect := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*5, 100, 20}
+	clock := NewText(&rect, "00:00", sdl.Color{250, 250, 250, 1})
+	l, _ := app.Scene.AddLayer("clock")
+	l.AddItem(&clock)
+	go func() {
+		for {
+			time.Sleep(500 * time.Millisecond)
+			clock.SetText(time.Now().Format(`15:04`))
+		}
+	}()
 }

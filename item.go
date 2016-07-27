@@ -255,7 +255,9 @@ func (item *Text) DrawText(text string, rect *sdl.Rect, color sdl.Color, font *t
 	// log.Println("DRAW:", text, colorName, fontName)
 	message, err := font.RenderUTF8_Blended(text, color)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Error in DrawText: %v ('%v')", err, text)
+		item.DrawText(text, rect, color, font)
+		return
 	}
 	defer message.Free()
 	srcRect := sdl.Rect{}
