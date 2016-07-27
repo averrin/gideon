@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -143,7 +141,7 @@ func (app *Application) initWeather() {
 	icon.SetFont(fontIcons)
 	rect := sdl.Rect{10, PADDING_TOP + 90, -1, FONT_SIZE + 2}
 	text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
-	if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
+	if fmt.Sprintf("%v", weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
 		text = fmt.Sprintf("Temp: %v°", weather.TempC)
 	}
 	temp := NewText(&rect, text, white)
@@ -165,7 +163,7 @@ func (app *Application) initWeather() {
 			fmt.Print("wu")
 			weather = GetWeather()
 			text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
-			if strconv.Itoa(weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
+			if fmt.Sprintf("%v", weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
 				text = fmt.Sprintf("Temp: %v°", weather.TempC)
 			}
 			temp.SetText(text)
@@ -177,10 +175,12 @@ func (app *Application) initWeather() {
 	}()
 
 	l, _ := app.Scene.AddLayer("info")
-	l.AddItem(&icon)
-	l.AddItem(&temp)
-	l.AddItem(&hum)
-	l.AddItem(&wea)
+	l.AddItems([]Drawable{
+		&icon,
+		&temp,
+		&hum,
+		&wea,
+	})
 }
 
 func (app *Application) initPinger() *Text {
@@ -203,32 +203,4 @@ func (app *Application) initPinger() *Text {
 	l.AddItem(&icon)
 	l.AddItem(&label)
 	return &icon
-}
-
-func TestConnection(icon *Text) {
-	red := sdl.Color{246, 61, 28, 1}
-	green := sdl.Color{124, 221, 23, 1}
-	yellow := sdl.Color{210, 160, 62, 1}
-	for {
-		time.Sleep(10 * time.Second)
-		icon.SetRules([]HighlightRule{HighlightRule{0, -1, yellow, font}})
-		online := Ping()
-		status := red
-		if online {
-			status = green
-			fmt.Print(":")
-		}
-		icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, font}})
-	}
-}
-
-func Ping() bool {
-	url := "http://google.com"
-	fmt.Print(".")
-	resp, err := http.Get(url)
-	if err != nil || resp.StatusCode != 200 {
-		fmt.Print("x")
-		return false
-	}
-	return true
 }

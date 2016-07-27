@@ -16,6 +16,12 @@ func (L *Layer) AddItem(item Drawable) {
 	item.SetParentSurface(L.Surface)
 }
 
+func (L *Layer) AddItems(items []Drawable) {
+	for _, item := range items {
+		L.AddItem(item)
+	}
+}
+
 func (L *Layer) Draw() *sdl.Surface {
 	for _, item := range L.Items {
 		i := (*item)
