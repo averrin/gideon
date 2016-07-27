@@ -89,13 +89,15 @@ func GetWeather() CurrentObservation {
 	url := fmt.Sprintf(WUNDER, APIKEY, LOCATION)
 	// log.Print(url)
 	response, err := http.Get(url)
-	if err != nil {
+	if err != nil || response.StatusCode != 200 {
+                log.Print("Weather error")
 		return w
 	}
 
 	defer response.Body.Close()
 	var r WeatherResponse
 	body, _ := ioutil.ReadAll(response.Body)
+        defer response.Body.Close()
 	err = json.Unmarshal(body, &r)
 	if err != nil {
 		log.Print(string(body))

@@ -62,8 +62,8 @@ func (app *Application) run() int {
 	w := 800
 	h := 600
 	window, err := sdl.CreateWindow("Gideon", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		// w, h, sdl.WINDOW_FULLSCREEN_DESKTOP)
-		w, h, sdl.WINDOW_SHOWN)
+		w, h, sdl.WINDOW_FULLSCREEN_DESKTOP)
+		// w, h, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
@@ -85,8 +85,8 @@ func (app *Application) run() int {
 	LoadFonts(FONT_SIZE)
 	app.initWeather()
 	app.initClock()
-	pingStatus := app.initPinger()
-	go TestConnection(pingStatus)
+	//pingStatus := app.initPinger()
+	//go TestConnection(pingStatus)
 	go app.Scene.Run()
 
 	running := true
@@ -160,7 +160,7 @@ func (app *Application) initWeather() {
 
 	go func() {
 		for {
-			time.Sleep(5 * time.Minute)
+			sdl.Delay(5 * 1000 * 60)
 			fmt.Print("wu")
 			weather = GetWeather()
 			text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
@@ -213,7 +213,8 @@ func (app *Application) initClock() {
 	l.AddItem(&clock)
 	go func() {
 		for {
-			time.Sleep(500 * time.Millisecond)
+			// time.Sleep(500 * time.Millisecond)
+                        sdl.Delay(500)
 			clock.SetText(time.Now().Format(`15:04`))
 		}
 	}()
