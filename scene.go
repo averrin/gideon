@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -86,7 +85,7 @@ func (S *Scene) Draw() bool {
 	if !changed {
 		return changed
 	}
-	fmt.Println(len(S.LayersStack))
+	// fmt.Println(len(S.LayersStack))
 	S.Clear()
 	w := sync.WaitGroup{}
 	for _, layer := range S.LayersStack {

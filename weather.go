@@ -87,19 +87,20 @@ type WeatherResponse struct {
 }
 
 func GetWeather() CurrentObservation {
-        var w CurrentObservation
+	var w CurrentObservation
 	url := fmt.Sprintf(WUNDER, APIKEY, LOCATION)
 	log.Print(url)
 	response, err := http.Get(url)
-        if err != nil {
-        	return w
-        }
+	if err != nil {
+		return w
+	}
 
 	defer response.Body.Close()
 	var r WeatherResponse
 	body, _ := ioutil.ReadAll(response.Body)
 	json.Unmarshal(body, &r)
-	log.Print(string(body), "||", r.CurrentObservation.Icon)
-        w = r.CurrentObservation
+	fmt.Print(r.CurrentObservation.Icon)
+	w = r.CurrentObservation
+	// w.TempC = rand.Int()
 	return w
 }

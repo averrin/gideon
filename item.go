@@ -207,6 +207,11 @@ func NewText(rect *sdl.Rect, text string, color sdl.Color) Text {
 	item.Color = color
 	item.Font = font
 	item.NeedClear = true
+	if rect.W == -1 {
+		lw, _, _ := font.SizeUTF8(text)
+		item.Rect.Rect.W = int32(lw)
+		// log.Print("new width: ", lw)
+	}
 	return *item
 }
 
@@ -217,6 +222,9 @@ func (item *Text) SetNeedClear(need bool) {
 
 func (item *Text) SetText(text string) {
 	item.Text = text
+	lw, _, _ := font.SizeUTF8(text)
+	item.Rect.Rect.W = int32(lw)
+	// log.Print("new width: ", lw)
 	item.Changed = true
 }
 
@@ -234,15 +242,6 @@ func (item *Text) Draw() {
 	if item.NeedClear {
 		item.Clear()
 	}
-	// s := item.ParentSurface
-	// message, err := item.Font.RenderUTF8_Blended(item.Text, item.Color)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer message.Free()
-	// srcRect := sdl.Rect{}
-	// message.GetClipRect(&srcRect)
-	// message.Blit(&srcRect, s, item.GetRect())
 	item.DrawColoredText()
 	item.Changed = false
 	item.LastRects = append(item.LastRects, item.Rect.Rect)
