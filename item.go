@@ -223,7 +223,8 @@ func (item *Text) SetNeedClear(need bool) {
 func (item *Text) SetText(text string) {
 	item.Text = text
 	lw, _, _ := font.SizeUTF8(text)
-	item.Rect.Rect.W = int32(lw)
+        item.LastRects = append(item.LastRects, item.Rect.Rect)
+	item.Rect.Rect = &sdl.Rect{item.Rect.Rect.X, item.Rect.Rect.Y, int32(lw), item.Rect.Rect.H}
 	// log.Print("new width: ", lw)
 	item.Changed = true
 }
