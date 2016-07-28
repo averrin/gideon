@@ -6,6 +6,7 @@ import (
 	"path"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_ttf"
@@ -51,7 +52,8 @@ func (S *Scene) Run() {
 			S.App.Window.UpdateSurface()
 			S.Changed = false
 		}
-		sdl.Delay(5)
+		// sdl.Delay(5)
+		time.Sleep(5)
 	}
 }
 

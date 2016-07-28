@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
-        "io/ioutil"
+	"time"
 	//"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -14,9 +15,9 @@ func TestConnection(icon *Text) {
 	green := sdl.Color{124, 221, 23, 1}
 	//yellow := sdl.Color{210, 160, 62, 1}
 	for {
-		//time.Sleep(10 * time.Second)
-                sdl.Delay(10 * 1000)
-	//	icon.SetRules([]HighlightRule{HighlightRule{0, -1, yellow, font}})
+		time.Sleep(10 * time.Second)
+		// sdl.Delay(10 * 1000)
+		//	icon.SetRules([]HighlightRule{HighlightRule{0, -1, yellow, font}})
 		online := Ping()
 		status := red
 		if online {
@@ -33,9 +34,9 @@ func Ping() bool {
 	resp, err := http.Get(url)
 	if err != nil || resp.StatusCode != 200 {
 		fmt.Print(err)
-	        body, _ := ioutil.ReadAll(resp.Body)
-                defer resp.Body.Close()
-                print(body)
+		body, _ := ioutil.ReadAll(resp.Body)
+		defer resp.Body.Close()
+		print(body)
 		return false
 	}
 	return true

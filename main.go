@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -18,6 +19,7 @@ const FONT_SIZE = 24
 const PADDING_TOP = 10
 
 var weather CurrentObservation
+var FontLock *sync.Mutex
 
 func main() {
 	app := new(Application)
@@ -36,6 +38,7 @@ var icons map[string]string
 func (app *Application) run() int {
 	sdl.Init(sdl.INIT_EVERYTHING)
 	ttf.Init()
+	FontLock = &sync.Mutex{}
 
 	icons = map[string]string{
 		"partlycloudy":   "\uf002",
@@ -48,7 +51,7 @@ func (app *Application) run() int {
 		"chancesnow":     "\uf07b",
 		"chancetstorms":  "\uf07b",
 		"flurries":       "\uf07b",
-		"fog":            "\uf003",
+		"fog":            "\uf007",
 		"hazy":           "\uf0b6",
 		"mostlycloudy":   "\uf013",
 		"mostlysunny":    "\uf00d",
@@ -57,13 +60,14 @@ func (app *Application) run() int {
 		"snow":           "\uf07b",
 		"sunny":          "\uf07b",
 		"tstorms":        "\uf01d",
+		"none":           "\uf07b",
 	}
 
 	w := 800
 	h := 600
 	window, err := sdl.CreateWindow("Gideon", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
 		w, h, sdl.WINDOW_FULLSCREEN_DESKTOP)
-		// w, h, sdl.WINDOW_SHOWN)
+	// w, h, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
@@ -79,14 +83,14 @@ func (app *Application) run() int {
 	renderer.Clear()
 	app.Scene = NewScene(app, Geometry{int32(w), int32(h)})
 	renderer.Present()
-	sdl.Delay(5)
+	time.Sleep(5)
 	app.Window.UpdateSurface()
 
 	LoadFonts(FONT_SIZE)
 	app.initWeather()
 	app.initClock()
-	//pingStatus := app.initPinger()
-	//go TestConnection(pingStatus)
+	pingStatus := app.initPinger()
+	go TestConnection(pingStatus)
 	go app.Scene.Run()
 
 	running := true
@@ -118,18 +122,18 @@ func (app *Application) run() int {
 func (app *Application) initWeather() {
 	white := sdl.Color{250, 250, 250, 1}
 	weather = GetWeather()
-	blank := CurrentObservation{}
-	if weather == blank {
-		fmt.Print("wx")
-		rectI := sdl.Rect{30, PADDING_TOP, 100, 100}
-		icon := NewText(&rectI, "\uf07b", white)
-		rectW := sdl.Rect{10, 90 + (FONT_SIZE+2)*1, -1, 20}
-		no := NewText(&rectW, "Weather unavailable.", white)
-		l, _ := app.Scene.AddLayer("info")
-		l.AddItem(&icon)
-		l.AddItem(&no)
-		return
-	}
+	// blank := CurrentObservation{}
+	// if weather == blank {
+	// 	fmt.Print("wx")
+	// 	rectI := sdl.Rect{30, PADDING_TOP, 100, 100}
+	// 	icon := NewText(&rectI, "\uf07b", white)
+	// 	rectW := sdl.Rect{10, 90 + (FONT_SIZE+2)*1, -1, 20}
+	// 	no := NewText(&rectW, "Weather unavailable.", white)
+	// 	l, _ := app.Scene.AddLayer("info")
+	// 	l.AddItem(&icon)
+	// 	l.AddItem(&no)
+	// 	return
+	// }
 	//●⬤
 
 	rectI := sdl.Rect{30, PADDING_TOP, 100, 100}
@@ -158,20 +162,27 @@ func (app *Application) initWeather() {
 	wea := NewText(&rectW, textW, white)
 	wea.SetRules([]HighlightRule{HighlightRule{0, -1, white, boldFont}})
 
+	blank := CurrentObservation{}
 	go func() {
 		for {
-			sdl.Delay(5 * 1000 * 60)
+			// sdl.Delay(5 * 1000 * 60)
+			time.Sleep(5 * time.Minute)
 			fmt.Print("wu")
 			weather = GetWeather()
-			text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
-			if fmt.Sprintf("%v", weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
-				text = fmt.Sprintf("Temp: %v°", weather.TempC)
+			if weather != blank {
+				text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
+				if fmt.Sprintf("%v", weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
+					text = fmt.Sprintf("Temp: %v°", weather.TempC)
+				}
+				temp.SetText(text)
+				textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
+				hum.SetText(textH)
+				wea.SetText(weather.Weather)
+				icon.SetText(icons[weather.Icon])
+			} else {
+				icon.SetText(icons["none"])
+				wea.SetText("Weather unavailable")
 			}
-			temp.SetText(text)
-			textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
-			hum.SetText(textH)
-			wea.SetText(weather.Weather)
-			icon.SetText(icons[weather.Icon])
 		}
 	}()
 
@@ -213,8 +224,8 @@ func (app *Application) initClock() {
 	l.AddItem(&clock)
 	go func() {
 		for {
-			// time.Sleep(500 * time.Millisecond)
-                        sdl.Delay(500)
+			time.Sleep(500 * time.Millisecond)
+			// sdl.Delay(500)
 			clock.SetText(time.Now().Format(`15:04`))
 		}
 	}()

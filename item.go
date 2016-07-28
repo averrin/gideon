@@ -253,12 +253,15 @@ func (item *Text) DrawText(text string, rect *sdl.Rect, color sdl.Color, font *t
 		return
 	}
 	// log.Println("DRAW:", text, colorName, fontName)
+	FontLock.Lock()
 	message, err := font.RenderUTF8_Blended(text, color)
 	if err != nil {
 		log.Printf("Error in DrawText: %v ('%v')", err, text)
+		FontLock.Unlock()
 		item.DrawText(text, rect, color, font)
 		return
 	}
+	FontLock.Unlock()
 	defer message.Free()
 	srcRect := sdl.Rect{}
 	message.GetClipRect(&srcRect)
