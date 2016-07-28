@@ -46,7 +46,7 @@ func (app *Application) run() int {
 		"rain":           "\uf019",
 		"clear":          "\uf00d",
 		"chanceflurries": "\uf064",
-		"chancerain":     "\uf008",
+		"chancerain":     "\uf01c",
 		"chancesleet":    "\uf0b2",
 		"chancesnow":     "\uf065",
 		"chancetstorms":  "\uf010",
