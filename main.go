@@ -133,25 +133,11 @@ func (app *Application) run() int {
 }
 
 func (app *Application) initWeather() {
-	white := sdl.Color{250, 250, 250, 1}
 	weather = GetWeather()
-	// blank := CurrentObservation{}
-	// if weather == blank {
-	// 	fmt.Print("wx")
-	// 	rectI := sdl.Rect{30, PADDING_TOP, 100, 100}
-	// 	icon := NewText(&rectI, "\uf07b", white)
-	// 	rectW := sdl.Rect{10, 90 + (FONT_SIZE+2)*1, -1, 20}
-	// 	no := NewText(&rectW, "Weather unavailable.", white)
-	// 	l, _ := app.Scene.AddLayer("info")
-	// 	l.AddItem(&icon)
-	// 	l.AddItem(&no)
-	// 	return
-	// }
-	//●⬤
 
 	rectI := sdl.Rect{30, PADDING_TOP, 100, 100}
 	textI := icons[weather.Icon]
-	icon := NewText(&rectI, textI, white)
+	icon := NewText(&rectI, textI, "#eeeeee")
 
 	fontIcons := GetFont("weathericons-regular-webfont.ttf", 60)
 	icon.SetFont(fontIcons)
@@ -160,18 +146,18 @@ func (app *Application) initWeather() {
 	if fmt.Sprintf("%v", weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
 		text = fmt.Sprintf("Temp: %v°", weather.TempC)
 	}
-	temp := NewText(&rect, text, white)
-	temp.SetRules([]HighlightRule{HighlightRule{5, -1, sdl.Color{200, 200, 100, 1}, boldFont}})
+	temp := NewText(&rect, text, "#eeeeee")
+	temp.SetRules([]HighlightRule{HighlightRule{5, -1, "burnt orange", boldFont}})
 
 	rectH := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*1, -1, 20}
 	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
-	hum := NewText(&rectH, textH, white)
-	hum.SetRules([]HighlightRule{HighlightRule{9, -1, sdl.Color{100, 133, 167, 1}, boldFont}})
+	hum := NewText(&rectH, textH, "#eeeeee")
+	hum.SetRules([]HighlightRule{HighlightRule{9, -1, "denim", boldFont}})
 
 	rectW := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*2, -1, 20}
 	textW := fmt.Sprintf("%v", weather.Weather)
-	wea := NewText(&rectW, textW, white)
-	wea.SetRules([]HighlightRule{HighlightRule{0, -1, white, boldFont}})
+	wea := NewText(&rectW, textW, "#eeeeee")
+	wea.SetRules([]HighlightRule{HighlightRule{0, -1, "#eeeeee", boldFont}})
 
 	blank := CurrentObservation{}
 	go func() {
@@ -209,16 +195,13 @@ func (app *Application) initWeather() {
 func (app *Application) initPinger() *Text {
 	rect := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}
 	text := "\uf111"
-	red := sdl.Color{246, 61, 28, 1}
-	green := sdl.Color{124, 221, 23, 1}
-	yellow := sdl.Color{210, 160, 62, 1}
-	icon := NewText(&rect, text, yellow)
-	label := NewText(&sdl.Rect{40, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}, "Network", sdl.Color{250, 250, 250, 1})
+	icon := NewText(&rect, text, "yellow")
+	label := NewText(&sdl.Rect{40, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}, "Network", "#eeeeee")
 
 	online := Ping()
-	status := red
+	status := "red"
 	if online {
-		status = green
+		status = "green"
 	}
 	icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, defaultFont}})
 
@@ -230,7 +213,7 @@ func (app *Application) initPinger() *Text {
 
 func (app *Application) initClock() {
 	rect := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*5, 100, 20}
-	clock := NewText(&rect, "00:00", sdl.Color{250, 250, 250, 1})
+	clock := NewText(&rect, "00:00", "#eeeeee")
 	l, _ := app.Scene.AddLayer("clock")
 	l.AddItem(&clock)
 	go func() {

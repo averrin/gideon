@@ -68,7 +68,7 @@ func NewImage(rect *sdl.Rect, path string, alt string) Image {
 		item.Image.FillRect(&sdl.Rect{0, 0, rect.W, rect.H}, 0xff000000)
 		alt = StripLine(alt, rect.W)
 		lw, _, _ := defaultFont.Font.SizeUTF8(alt)
-		title := NewText(&sdl.Rect{int32(rect.W/2) - int32(lw/2), int32(rect.H/2) - int32(defaultFont.Font.Height()/2), int32(lw), int32(defaultFont.Font.Height())}, alt, sdl.Color{250, 250, 250, 1})
+		title := NewText(&sdl.Rect{int32(rect.W/2) - int32(lw/2), int32(rect.H/2) - int32(defaultFont.Font.Height()/2), int32(lw), int32(defaultFont.Font.Height())}, alt, "#eeeeee")
 		title.SetParentSurface(item.Image)
 		title.SetNeedClear(false)
 		title.Draw()
@@ -193,13 +193,13 @@ func (item *Rect) MoveTo(x int32, y int32) {
 type Text struct {
 	Rect
 	Text      string
-	Color     sdl.Color
+	Color     string
 	Font      *Font
 	NeedClear bool
 	Rules     []HighlightRule
 }
 
-func NewText(rect *sdl.Rect, text string, color sdl.Color) Text {
+func NewText(rect *sdl.Rect, text string, color string) Text {
 	item := new(Text)
 	item.Rect = NewRect(rect, 0)
 	item.Text = text
@@ -249,7 +249,7 @@ func (item *Text) Draw() {
 }
 
 // DrawText is
-func (item *Text) DrawText(text string, rect *sdl.Rect, color sdl.Color, font *Font) {
+func (item *Text) DrawText(text string, rect *sdl.Rect, color string, font *Font) {
 	if strings.TrimSpace(text) == "" {
 		return
 	}
@@ -270,7 +270,7 @@ func (item *Text) DrawText(text string, rect *sdl.Rect, color sdl.Color, font *F
 type HighlightRule struct {
 	Start int
 	Len   int
-	Color sdl.Color
+	Color string
 	Font  *Font
 }
 

@@ -19,10 +19,10 @@ type Font struct {
 
 var cache map[string]map[int]*Font
 
-func (F *Font) Draw(text string, color sdl.Color) (*sdl.Surface, error) {
+func (F *Font) Draw(text string, color string) (*sdl.Surface, error) {
 	F.Lock()
 	defer F.Unlock()
-	return F.Font.RenderUTF8_Blended(text, color)
+	return F.Font.RenderUTF8_Blended(text, GetColor(color))
 }
 
 func GetFont(fname string, size int) *Font {
