@@ -4,9 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
-	"path/filepath"
-	"sync"
 	"time"
 
 	"github.com/spf13/viper"
@@ -18,7 +15,6 @@ const WUNDER = "http://api.wunderground.com/api/%s/conditions/q/%s.json"
 const PADDING_TOP = 10
 
 var weather CurrentObservation
-var FontLock *sync.Mutex
 var windowed *bool
 var APIKEY string
 var LOCATION string
@@ -53,7 +49,6 @@ var icons map[string]string
 func (app *Application) run() int {
 	sdl.Init(sdl.INIT_EVERYTHING)
 	ttf.Init()
-	FontLock = &sync.Mutex{}
 
 	icons = map[string]string{
 		"partlycloudy":   "\uf002",
@@ -158,9 +153,7 @@ func (app *Application) initWeather() {
 	textI := icons[weather.Icon]
 	icon := NewText(&rectI, textI, white)
 
-	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	dir := filepath.Join(cwd, "fonts")
-	fontIcons, _ := ttf.OpenFont(path.Join(dir, "weathericons-regular-webfont.ttf"), 60)
+	fontIcons := GetFont("weathericons-regular-webfont.ttf", 60)
 	icon.SetFont(fontIcons)
 	rect := sdl.Rect{10, PADDING_TOP + 90, -1, FONT_SIZE + 2}
 	text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
@@ -227,7 +220,7 @@ func (app *Application) initPinger() *Text {
 	if online {
 		status = green
 	}
-	icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, font}})
+	icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, defaultFont}})
 
 	l, _ := app.Scene.AddLayer("pinger")
 	l.AddItem(&icon)

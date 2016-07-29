@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/sdl_ttf"
 )
 
 type Drawable interface {
@@ -45,10 +44,10 @@ func (item *Rect) SetParentSurface(s *sdl.Surface) {
 }
 
 func StripLine(line string, w int32) string {
-	lw, _, _ := font.SizeUTF8(line)
+	lw, _, _ := defaultFont.Font.SizeUTF8(line)
 	for int32(lw) > int32(w)-16 {
 		line = strings.TrimRight(line[:len(line)-4], " -") + "…"
-		lw, _, _ = font.SizeUTF8(line)
+		lw, _, _ = defaultFont.Font.SizeUTF8(line)
 	}
 	return line
 }
@@ -68,8 +67,8 @@ func NewImage(rect *sdl.Rect, path string, alt string) Image {
 		item.Image = s
 		item.Image.FillRect(&sdl.Rect{0, 0, rect.W, rect.H}, 0xff000000)
 		alt = StripLine(alt, rect.W)
-		lw, _, _ := font.SizeUTF8(alt)
-		title := NewText(&sdl.Rect{int32(rect.W/2) - int32(lw/2), int32(rect.H/2) - int32(font.Height()/2), int32(lw), int32(font.Height())}, alt, sdl.Color{250, 250, 250, 1})
+		lw, _, _ := defaultFont.Font.SizeUTF8(alt)
+		title := NewText(&sdl.Rect{int32(rect.W/2) - int32(lw/2), int32(rect.H/2) - int32(defaultFont.Font.Height()/2), int32(lw), int32(defaultFont.Font.Height())}, alt, sdl.Color{250, 250, 250, 1})
 		title.SetParentSurface(item.Image)
 		title.SetNeedClear(false)
 		title.Draw()
@@ -195,7 +194,7 @@ type Text struct {
 	Rect
 	Text      string
 	Color     sdl.Color
-	Font      *ttf.Font
+	Font      *Font
 	NeedClear bool
 	Rules     []HighlightRule
 }
@@ -205,10 +204,10 @@ func NewText(rect *sdl.Rect, text string, color sdl.Color) Text {
 	item.Rect = NewRect(rect, 0)
 	item.Text = text
 	item.Color = color
-	item.Font = font
+	item.Font = defaultFont
 	item.NeedClear = true
 	if rect.W == -1 {
-		lw, _, _ := font.SizeUTF8(text)
+		lw, _, _ := defaultFont.Font.SizeUTF8(text)
 		item.Rect.Rect.W = int32(lw)
 		// log.Print("new width: ", lw)
 	}
@@ -222,7 +221,7 @@ func (item *Text) SetNeedClear(need bool) {
 
 func (item *Text) SetText(text string) {
 	item.Text = text
-	lw, _, _ := font.SizeUTF8(text)
+	lw, _, _ := defaultFont.Font.SizeUTF8(text)
 	item.LastRects = append(item.LastRects, item.Rect.Rect)
 	item.Rect.Rect = &sdl.Rect{item.Rect.Rect.X, item.Rect.Rect.Y, int32(lw), item.Rect.Rect.H}
 	item.LastRects = append(item.LastRects, item.Rect.Rect)
@@ -230,7 +229,7 @@ func (item *Text) SetText(text string) {
 	item.Changed = true
 }
 
-func (item *Text) SetFont(font *ttf.Font) {
+func (item *Text) SetFont(font *Font) {
 	item.Font = font
 	item.Changed = true
 }
@@ -250,20 +249,17 @@ func (item *Text) Draw() {
 }
 
 // DrawText is
-func (item *Text) DrawText(text string, rect *sdl.Rect, color sdl.Color, font *ttf.Font) {
+func (item *Text) DrawText(text string, rect *sdl.Rect, color sdl.Color, font *Font) {
 	if strings.TrimSpace(text) == "" {
 		return
 	}
 	// log.Println("DRAW:", text, colorName, fontName)
-	FontLock.Lock()
-	message, err := font.RenderUTF8_Blended(text, color)
+	message, err := font.Draw(text, color)
 	if err != nil {
 		log.Printf("Error in DrawText: %v ('%v')", err, text)
-		FontLock.Unlock()
 		item.DrawText(text, rect, color, font)
 		return
 	}
-	FontLock.Unlock()
 	defer message.Free()
 	srcRect := sdl.Rect{}
 	message.GetClipRect(&srcRect)
@@ -275,7 +271,7 @@ type HighlightRule struct {
 	Start int
 	Len   int
 	Color sdl.Color
-	Font  *ttf.Font
+	Font  *Font
 }
 
 // DrawColoredText is
@@ -298,7 +294,7 @@ func (item *Text) DrawColoredText() {
 			var tw int
 			if len(token) > 0 {
 				item.DrawText(token, rect, color, font)
-				tw, _, _ = font.SizeUTF8(token)
+				tw, _, _ = font.Font.SizeUTF8(token)
 				rect = &sdl.Rect{
 					X: rect.X + int32(tw),
 					Y: rect.Y,
@@ -313,7 +309,7 @@ func (item *Text) DrawColoredText() {
 			}
 			token = text[:l]
 			item.DrawText(token, rect, rule.Color, rule.Font)
-			tw, _, _ = font.SizeUTF8(token)
+			tw, _, _ = font.Font.SizeUTF8(token)
 			rect = &sdl.Rect{
 				X: rect.X + int32(tw),
 				Y: rect.Y,

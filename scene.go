@@ -2,14 +2,10 @@ package main
 
 import (
 	"errors"
-	"os"
-	"path"
-	"path/filepath"
 	"sync"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/sdl_ttf"
 )
 
 type Geometry struct {
@@ -27,8 +23,8 @@ type Scene struct {
 	Geometry
 }
 
-var font *ttf.Font
-var boldFont *ttf.Font
+var defaultFont *Font
+var boldFont *Font
 
 //NewScene constructor
 func NewScene(app *Application, size Geometry) *Scene {
@@ -58,10 +54,8 @@ func (S *Scene) Run() {
 }
 
 func LoadFonts(size int) {
-	cwd, _ := filepath.Abs(filepath.Dir(os.Args[0]))
-	dir := filepath.Join(cwd, "fonts")
-	font, _ = ttf.OpenFont(path.Join(dir, "Fantasque Regular.ttf"), size)
-	boldFont, _ = ttf.OpenFont(path.Join(dir, "Fantasque Bold.ttf"), size)
+	defaultFont = GetFont("Fantasque Regular.ttf", size)
+	boldFont = GetFont("Fantasque Bold.ttf", size)
 }
 
 func (S *Scene) Reset() {

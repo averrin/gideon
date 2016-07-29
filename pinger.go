@@ -24,7 +24,7 @@ func TestConnection(icon *Text) {
 			status = green
 			fmt.Print(":")
 		}
-		icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, font}})
+		icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, defaultFont}})
 	}
 }
 
