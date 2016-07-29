@@ -25,7 +25,7 @@ func TestConnection(icon *Text, addr string) {
 	p.OnRecv = func(addr *net.IPAddr, rtt time.Duration) {
 		// fmt.Printf("IP Addr: %s receive, RTT: %v\n", addr.String(), rtt)
 		fmt.Print("+")
-		icon.SetRules([]HighlightRule{HighlightRule{0, -1, "asparagus", defaultFont}})
+		icon.SetRules([]HighlightRule{HighlightRule{0, -1, "green", defaultFont}})
 		attempts = 0
 	}
 	p.OnIdle = func() {

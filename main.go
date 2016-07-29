@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+        "strings"
+        "os/exec"
 
 	"github.com/spf13/viper"
 	"github.com/veandco/go-sdl2/sdl"
@@ -102,11 +104,13 @@ func (app *Application) run() int {
 	LoadFonts(int(FONT_SIZE))
 	app.initWeather()
 	app.initClock()
-	pingNetwork := app.initPinger("Network", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*4)
-	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*5)
+	app.initInterior(PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*4)
+
+	pingNetwork := app.initPinger("Network", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*8)
+	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*9)
 
 	go TestConnection(pingNetwork, "8.8.8.8")
-	go TestConnection(pingPC, "192.168.1.30")
+	go TestConnection(pingPC, "192.168.1.38")
 	go app.Scene.Run()
 
 	running := true
@@ -193,6 +197,41 @@ func (app *Application) initWeather() {
 		&hum,
 		&wea,
 	})
+}
+
+func (app *Application) initInterior(x int32, y int32) {
+	rect := sdl.Rect{x, y, -1, FONT_SIZE + 2}
+	title := NewText(&rect, "Interior", "#eeeeee")
+        title.SetFont(boldFont)
+
+	rectT := sdl.Rect{x, y + (FONT_SIZE+2)*1, -1, FONT_SIZE + 2}
+	textT := fmt.Sprintf("Temp: %v°", 0)
+	temp := NewText(&rectT, textT, "#eeeeee")
+	temp.SetRules([]HighlightRule{HighlightRule{5, -1, "orange yellow", boldFont}})
+
+	rectH := sdl.Rect{x, y + (FONT_SIZE+2)*2, -1, 20}
+	textH := fmt.Sprintf("Humidity: %v", 0)
+	hum := NewText(&rectH, textH, "#eeeeee")
+	hum.SetRules([]HighlightRule{HighlightRule{9, -1, "cornflower", boldFont}})
+
+	l, _ := app.Scene.AddLayer("interior")
+	l.AddItem(&title)
+	l.AddItem(&temp)
+	l.AddItem(&hum)
+	go func() {
+          d := 0
+		for {
+			time.Sleep(time.Duration(d) * time.Second)
+                        outRaw, _ := exec.Command("python", "sht21.py").Output()
+                        out := strings.TrimRight(string(outRaw), "\n")
+                        fmt.Print(out)
+                        data := strings.Split(out, ";")
+                        temp.SetText(fmt.Sprintf("Temp: %v°", data[0]))
+                        hum.SetText(fmt.Sprintf("Humidity: %v%%", data[1]))
+                        d = 5
+			// sdl.Delay(500)
+		}
+	}()
 }
 
 func (app *Application) initPinger(title string, x int32, y int32) *Text {
