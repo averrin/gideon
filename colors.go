@@ -2,16 +2,16 @@ package main
 
 import (
 	"encoding/hex"
+	"sync"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
 
 var COLORS map[string]string
+var once sync.Once
 
 func GetColor(name string) sdl.Color {
-	if COLORS == nil {
-		initColors()
-	}
+	once.Do(initColors)
 	if string(name[0]) != "#" {
 		name = COLORS[name]
 	}
