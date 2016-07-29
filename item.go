@@ -9,6 +9,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+// Drawable is interface for item
 type Drawable interface {
 	Draw()
 	Move(int32, int32)
@@ -23,6 +24,7 @@ type Drawable interface {
 	Destroy()
 }
 
+// Rect is basic drawable item
 type Rect struct {
 	ParentSurface *sdl.Surface
 	Rect          *sdl.Rect
@@ -33,6 +35,7 @@ type Rect struct {
 	Changed       bool
 }
 
+// Image is item for drawing images
 type Image struct {
 	Rect
 	Path  string

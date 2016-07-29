@@ -7,9 +7,10 @@ import (
 	"sync"
 
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/sdl_ttf"
+	ttf "github.com/veandco/go-sdl2/sdl_ttf"
 )
 
+// Font abstraction with lock
 type Font struct {
 	sync.Mutex
 	Name string
@@ -19,12 +20,14 @@ type Font struct {
 
 var cache map[string]map[int]*Font
 
+// Draw text
 func (F *Font) Draw(text string, color string) (*sdl.Surface, error) {
 	F.Lock()
 	defer F.Unlock()
 	return F.Font.RenderUTF8_Blended(text, GetColor(color))
 }
 
+// GetFont with size
 func GetFont(fname string, size int) *Font {
 	if cache == nil {
 		cache = map[string]map[int]*Font{}

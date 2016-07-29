@@ -20,6 +20,7 @@ var windowed *bool
 var APIKEY string
 var LOCATION string
 var FONT_SIZE int32
+var icons map[string]string
 
 func main() {
 	windowed = flag.Bool("windowed", false, "display in window")
@@ -44,8 +45,6 @@ type Application struct {
 	Surface  *sdl.Surface
 	Scene    *Scene
 }
-
-var icons map[string]string
 
 func (app *Application) run() int {
 	sdl.Init(sdl.INIT_EVERYTHING)

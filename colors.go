@@ -7,9 +7,11 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+// COLORS -- named colors mapping
 var COLORS map[string]string
 var once sync.Once
 
+// GetColor -- get color by name or hex string
 func GetColor(name string) sdl.Color {
 	once.Do(initColors)
 	if string(name[0]) != "#" {

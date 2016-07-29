@@ -115,9 +115,9 @@ func (S *Scene) Clear() {
 
 func (S *Scene) removeLayer(name string) {
 	S.Lock()
+	defer S.Unlock()
 	_, ok := S.Layers[name]
 	if !ok {
-		S.Unlock()
 		return
 	}
 	delete(S.Layers, name)
@@ -129,7 +129,6 @@ func (S *Scene) removeLayer(name string) {
 		}
 	}
 	S.Changed = true
-	S.Unlock()
 }
 
 func (S *Scene) AddLayer(name string) (*Layer, error) {
@@ -140,6 +139,7 @@ func (S *Scene) AddLayer(name string) (*Layer, error) {
 	var layer *Layer
 
 	S.Lock()
+	defer S.Unlock()
 	layer, ok := S.Layers[name]
 	if ok {
 		return layer, errors.New("Use another layer name")
@@ -147,7 +147,6 @@ func (S *Scene) AddLayer(name string) (*Layer, error) {
 	layer = new(Layer)
 	S.Layers[name] = layer
 	S.LayersStack = append(S.LayersStack, layer)
-	S.Unlock()
 	layer.Name = name
 	layer.Rect = S.Rect
 	layer.Surface, _ = sdl.CreateRGBSurface(sdl.SWSURFACE, S.Width, S.Height, 32, rmask, gmask, bmask, amask)
