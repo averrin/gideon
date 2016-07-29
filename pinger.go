@@ -9,14 +9,17 @@ import (
 )
 
 func TestConnection(icon *Text) {
+	s := 0
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(time.Duration(s) * time.Second)
 		// sdl.Delay(10 * 1000)
 		//	icon.SetRules([]HighlightRule{HighlightRule{0, -1, yellow, font}})
 		online := Ping()
 		status := "red"
+		s = 5
 		if online {
-			status = "green"
+			status = "asparagus"
+			s = 30
 			fmt.Print(":")
 		}
 		icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, defaultFont}})

@@ -12,7 +12,8 @@ import (
 )
 
 const WUNDER = "http://api.wunderground.com/api/%s/conditions/q/%s.json"
-const PADDING_TOP = 10
+const PADDING_TOP = 20
+const PADDING_LEFT = 20
 
 var weather CurrentObservation
 var windowed *bool
@@ -141,20 +142,20 @@ func (app *Application) initWeather() {
 
 	fontIcons := GetFont("weathericons-regular-webfont.ttf", 60)
 	icon.SetFont(fontIcons)
-	rect := sdl.Rect{10, PADDING_TOP + 90, -1, FONT_SIZE + 2}
+	rect := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90, -1, FONT_SIZE + 2}
 	text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
 	if fmt.Sprintf("%v", weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
 		text = fmt.Sprintf("Temp: %v°", weather.TempC)
 	}
 	temp := NewText(&rect, text, "#eeeeee")
-	temp.SetRules([]HighlightRule{HighlightRule{5, -1, "burnt orange", boldFont}})
+	temp.SetRules([]HighlightRule{HighlightRule{5, -1, "orange yellow", boldFont}})
 
-	rectH := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*1, -1, 20}
+	rectH := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*1, -1, 20}
 	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
 	hum := NewText(&rectH, textH, "#eeeeee")
-	hum.SetRules([]HighlightRule{HighlightRule{9, -1, "denim", boldFont}})
+	hum.SetRules([]HighlightRule{HighlightRule{9, -1, "cornflower", boldFont}})
 
-	rectW := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*2, -1, 20}
+	rectW := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*2, -1, 20}
 	textW := fmt.Sprintf("%v", weather.Weather)
 	wea := NewText(&rectW, textW, "#eeeeee")
 	wea.SetRules([]HighlightRule{HighlightRule{0, -1, "#eeeeee", boldFont}})
@@ -193,17 +194,10 @@ func (app *Application) initWeather() {
 }
 
 func (app *Application) initPinger() *Text {
-	rect := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}
+	rect := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}
 	text := "\uf111"
-	icon := NewText(&rect, text, "yellow")
-	label := NewText(&sdl.Rect{40, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}, "Network", "#eeeeee")
-
-	online := Ping()
-	status := "red"
-	if online {
-		status = "green"
-	}
-	icon.SetRules([]HighlightRule{HighlightRule{0, -1, status, defaultFont}})
+	icon := NewText(&rect, text, "gray")
+	label := NewText(&sdl.Rect{PADDING_LEFT + 30, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}, "Network", "#eeeeee")
 
 	l, _ := app.Scene.AddLayer("pinger")
 	l.AddItem(&icon)
@@ -212,15 +206,20 @@ func (app *Application) initPinger() *Text {
 }
 
 func (app *Application) initClock() {
-	rect := sdl.Rect{10, PADDING_TOP + 90 + (FONT_SIZE+2)*5, 100, 20}
-	clock := NewText(&rect, "00:00", "#eeeeee")
+	rect := sdl.Rect{330, PADDING_TOP + 30, 100, 20}
+	clock := NewText(&rect, time.Now().Format(`15:04`), "#eeeeee")
+	clock.SetFont(GetFont(boldFont.Name, 60))
+	rect2 := sdl.Rect{350, PADDING_TOP + 90, 100, 20}
+	date := NewText(&rect2, time.Now().Format(`2 Jan Mon`), "#eeeeee")
 	l, _ := app.Scene.AddLayer("clock")
 	l.AddItem(&clock)
+	l.AddItem(&date)
 	go func() {
 		for {
 			time.Sleep(500 * time.Millisecond)
 			// sdl.Delay(500)
 			clock.SetText(time.Now().Format(`15:04`))
+			date.SetText(time.Now().Format(`2 Jan Mon`))
 		}
 	}()
 }

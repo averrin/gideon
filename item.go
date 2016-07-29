@@ -220,6 +220,9 @@ func (item *Text) SetNeedClear(need bool) {
 }
 
 func (item *Text) SetText(text string) {
+	if item.Text == text {
+		return
+	}
 	item.Text = text
 	lw, _, _ := defaultFont.Font.SizeUTF8(text)
 	item.LastRects = append(item.LastRects, item.Rect.Rect)
