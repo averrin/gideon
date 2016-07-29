@@ -29,24 +29,24 @@ func TestConnection(icon *Text, addr string) {
 		attempts = 0
 	}
 	p.OnIdle = func() {
-		if attempts > 5 {
+		if attempts > 10 {
 			icon.SetRules([]HighlightRule{HighlightRule{0, -1, "red", defaultFont}})
 			attempts = 0
-		} else {
+		} else if attempts > 5 {
 			icon.SetRules([]HighlightRule{HighlightRule{0, -1, "yellow", defaultFont}})
-			attempts++
 		}
+		attempts++
 	}
 	p.RunLoop()
-	ticker := time.NewTicker(time.Millisecond * 250)
+	// ticker := time.NewTicker(time.Millisecond * 250)
 	select {
 	case <-p.Done():
 		if err := p.Err(); err != nil {
 			log.Printf("Ping failed: %v", err)
 			icon.SetRules([]HighlightRule{HighlightRule{0, -1, "red", defaultFont}})
 		}
-	case <-ticker.C:
-		break
+		// case <-ticker.C:
+		// 	break
 	}
 }
 
