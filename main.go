@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"path"
@@ -8,20 +9,34 @@ import (
 	"sync"
 	"time"
 
+	"github.com/spf13/viper"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/sdl_ttf"
 )
 
 const WUNDER = "http://api.wunderground.com/api/%s/conditions/q/%s.json"
-const APIKEY = "bddbf374b57d9a80"
-const LOCATION = "ru/Vsevolozhsk"
-const FONT_SIZE = 24
 const PADDING_TOP = 10
 
 var weather CurrentObservation
 var FontLock *sync.Mutex
+var windowed *bool
+var APIKEY string
+var LOCATION string
+var FONT_SIZE int32
 
 func main() {
+	windowed = flag.Bool("windowed", false, "display in window")
+	flag.Parse()
+	viper.SetConfigType("yaml")
+	viper.SetConfigName("config") // name of config file (without extension)
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {             // Handle errors reading the config file
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+	APIKEY = viper.GetString("APIKEY")
+	LOCATION = viper.GetString("LOCATION")
+	FONT_SIZE = int32(viper.GetInt("FONT_SIZE"))
 	app := new(Application)
 	os.Exit(app.run())
 }
@@ -63,11 +78,14 @@ func (app *Application) run() int {
 		"none":           "\uf07b",
 	}
 
-	w := 800
-	h := 600
+	w := 640
+	h := 480
+	dmode := sdl.WINDOW_FULLSCREEN_DESKTOP
+	if *windowed {
+		dmode = sdl.WINDOW_SHOWN
+	}
 	window, err := sdl.CreateWindow("Gideon", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		w, h, sdl.WINDOW_FULLSCREEN_DESKTOP)
-	// w, h, sdl.WINDOW_SHOWN)
+		w, h, uint32(dmode))
 	if err != nil {
 		panic(err)
 	}
@@ -86,7 +104,7 @@ func (app *Application) run() int {
 	time.Sleep(5)
 	app.Window.UpdateSurface()
 
-	LoadFonts(FONT_SIZE)
+	LoadFonts(int(FONT_SIZE))
 	app.initWeather()
 	app.initClock()
 	pingStatus := app.initPinger()
