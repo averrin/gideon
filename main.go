@@ -103,8 +103,11 @@ func (app *Application) run() int {
 	LoadFonts(int(FONT_SIZE))
 	app.initWeather()
 	app.initClock()
-	pingStatus := app.initPinger()
-	go TestConnection(pingStatus)
+	pingNetwork := app.initPinger("Network", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*4)
+	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*5)
+
+	go TestConnection(pingNetwork, "8.8.8.8")
+	go TestConnection(pingPC, "192.168.1.30")
 	go app.Scene.Run()
 
 	running := true
@@ -165,7 +168,7 @@ func (app *Application) initWeather() {
 		for {
 			// sdl.Delay(5 * 1000 * 60)
 			time.Sleep(5 * time.Minute)
-			fmt.Print("wu")
+			fmt.Print("wu-")
 			weather = GetWeather()
 			if weather != blank {
 				text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
@@ -193,13 +196,13 @@ func (app *Application) initWeather() {
 	})
 }
 
-func (app *Application) initPinger() *Text {
-	rect := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}
+func (app *Application) initPinger(title string, x int32, y int32) *Text {
+	rect := sdl.Rect{x, y, 100, 20}
 	text := "\uf111"
 	icon := NewText(&rect, text, "gray")
-	label := NewText(&sdl.Rect{PADDING_LEFT + 30, PADDING_TOP + 90 + (FONT_SIZE+2)*4, 100, 20}, "Network", "#eeeeee")
+	label := NewText(&sdl.Rect{x + 30, y, 100, 20}, title, "#eeeeee")
 
-	l, _ := app.Scene.AddLayer("pinger")
+	l, _ := app.Scene.AddLayer("pinger_" + title)
 	l.AddItem(&icon)
 	l.AddItem(&label)
 	return &icon
