@@ -7,6 +7,7 @@ import (
 	"time"
         "strings"
         "os/exec"
+        "net/http"
 
 	"github.com/spf13/viper"
 	"github.com/veandco/go-sdl2/sdl"
@@ -108,9 +109,11 @@ func (app *Application) run() int {
 
 	pingNetwork := app.initPinger("Network", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*8)
 	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*9)
+	pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 
 	go TestConnection(pingNetwork, "8.8.8.8")
 	go TestConnection(pingPC, "192.168.1.38")
+	go TestConnection(pingTwin, "192.168.1.36")
 	go app.Scene.Run()
 
 	running := true
@@ -220,14 +223,27 @@ func (app *Application) initInterior(x int32, y int32) {
 	l.AddItem(&hum)
 	go func() {
           d := 0
+          tick := 0
 		for {
 			time.Sleep(time.Duration(d) * time.Second)
-                        outRaw, _ := exec.Command("python", "sht21.py").Output()
+                        outRaw, err := exec.Command("python", "sht21.py").Output()
+                        if err != nil {
+                          fmt.Print(err)
+                          continue
+                        }
                         out := strings.TrimRight(string(outRaw), "\n")
-                        fmt.Print(out)
                         data := strings.Split(out, ";")
+                        if len(data) != 2 {
+                          fmt.Print(out+";")
+                          continue
+                        }
                         temp.SetText(fmt.Sprintf("Temp: %v°", data[0]))
                         hum.SetText(fmt.Sprintf("Humidity: %v%%", data[1]))
+                        if tick > 12*5 {
+                        http.Get(fmt.Sprintf("http://data.sparkfun.com/input/1nlJWdO8moSz5odgzOv9?private_key=0mDEpRa8zwikDBo7kbRP&hum=%v&temp=%v", data[1], data[0]))
+                        tick = 0
+                      }
+                      tick++
                         d = 5
 			// sdl.Delay(500)
 		}
