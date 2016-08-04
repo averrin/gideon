@@ -13,10 +13,8 @@ import (
 	wu "github.com/averrin/shodan/modules/weather"
 	"github.com/spf13/viper"
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/veandco/go-sdl2/sdl_ttf"
 )
 
-const WUNDER = "http://api.wunderground.com/api/%s/conditions/q/%s.json"
 const PADDING_TOP = 20
 const PADDING_LEFT = 20
 
@@ -43,24 +41,10 @@ func main() {
 }
 
 type Application struct {
-	Window   *sdl.Window
-	Renderer *sdl.Renderer
-	Surface  *sdl.Surface
-	Scene    *seker.Scene
-}
-
-func (app *Application) GetSurface() *sdl.Surface {
-	return app.Surface
-}
-
-func (app *Application) GetWindow() *sdl.Window {
-	return app.Window
+	seker.Application
 }
 
 func (app *Application) run() int {
-	sdl.Init(sdl.INIT_EVERYTHING)
-	ttf.Init()
-
 	icons = map[string]string{
 		"partlycloudy":   "\uf002",
 		"cloudy":         "\uf013",
@@ -90,25 +74,8 @@ func (app *Application) run() int {
 	if *windowed {
 		dmode = sdl.WINDOW_SHOWN
 	}
-	window, err := sdl.CreateWindow("Gideon", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		w, h, uint32(dmode))
-	if err != nil {
-		panic(err)
-	}
-	app.Window = window
-	defer app.Window.Destroy()
-	renderer, err := sdl.CreateRenderer(app.Window, -1, sdl.RENDERER_ACCELERATED)
-	surface, err := app.Window.GetSurface()
-	if err != nil {
-		panic(err)
-	}
-	app.Renderer = renderer
-	app.Surface = surface
-	renderer.Clear()
-	app.Scene = seker.NewScene(app, seker.Geometry{int32(w), int32(h)})
-	renderer.Present()
-	time.Sleep(5)
-	app.Window.UpdateSurface()
+	app.Init("Gideon", uint32(dmode), seker.Geometry{int32(w), int32(h)})
+	defer app.Close()
 
 	seker.LoadFonts(int(FONT_SIZE))
 	app.initWeather()
