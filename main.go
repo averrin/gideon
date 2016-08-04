@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/averrin/seker"
 	sf "github.com/averrin/shodan/modules/sparkfun"
 	wu "github.com/averrin/shodan/modules/weather"
 	"github.com/spf13/viper"
@@ -45,7 +46,15 @@ type Application struct {
 	Window   *sdl.Window
 	Renderer *sdl.Renderer
 	Surface  *sdl.Surface
-	Scene    *Scene
+	Scene    *seker.Scene
+}
+
+func (app *Application) GetSurface() *sdl.Surface {
+	return app.Surface
+}
+
+func (app *Application) GetWindow() *sdl.Window {
+	return app.Window
 }
 
 func (app *Application) run() int {
@@ -96,12 +105,12 @@ func (app *Application) run() int {
 	app.Renderer = renderer
 	app.Surface = surface
 	renderer.Clear()
-	app.Scene = NewScene(app, Geometry{int32(w), int32(h)})
+	app.Scene = seker.NewScene(app, seker.Geometry{int32(w), int32(h)})
 	renderer.Present()
 	time.Sleep(5)
 	app.Window.UpdateSurface()
 
-	LoadFonts(int(FONT_SIZE))
+	seker.LoadFonts(int(FONT_SIZE))
 	app.initWeather()
 	app.initClock()
 	app.initInterior(PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*4)
@@ -146,27 +155,27 @@ func (app *Application) initWeather() {
 
 	rectI := sdl.Rect{30, PADDING_TOP, 100, 100}
 	textI := icons[weather.Icon]
-	icon := NewText(&rectI, textI, "#eeeeee")
+	icon := seker.NewText(&rectI, textI, "#eeeeee")
 
-	fontIcons := GetFont("weathericons-regular-webfont.ttf", 60)
+	fontIcons := seker.GetFont("weathericons-regular-webfont.ttf", 60)
 	icon.SetFont(fontIcons)
 	rect := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90, -1, FONT_SIZE + 2}
 	text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
 	if fmt.Sprintf("%v", weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
 		text = fmt.Sprintf("Temp: %v°", weather.TempC)
 	}
-	temp := NewText(&rect, text, "#eeeeee")
-	temp.SetRules([]HighlightRule{HighlightRule{5, -1, "orange yellow", boldFont}})
+	temp := seker.NewText(&rect, text, "#eeeeee")
+	temp.SetRules([]seker.HighlightRule{seker.HighlightRule{5, -1, "orange yellow", seker.BoldFont}})
 
 	rectH := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*1, -1, 20}
 	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
-	hum := NewText(&rectH, textH, "#eeeeee")
-	hum.SetRules([]HighlightRule{HighlightRule{9, -1, "cornflower", boldFont}})
+	hum := seker.NewText(&rectH, textH, "#eeeeee")
+	hum.SetRules([]seker.HighlightRule{seker.HighlightRule{9, -1, "cornflower", seker.BoldFont}})
 
 	rectW := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*2, -1, 20}
 	textW := fmt.Sprintf("%v", weather.Weather)
-	wea := NewText(&rectW, textW, "#eeeeee")
-	wea.SetRules([]HighlightRule{HighlightRule{0, -1, "#eeeeee", boldFont}})
+	wea := seker.NewText(&rectW, textW, "#eeeeee")
+	wea.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "#eeeeee", seker.BoldFont}})
 
 	blank := wu.Weather{}
 	go func() {
@@ -193,7 +202,7 @@ func (app *Application) initWeather() {
 	}()
 
 	l, _ := app.Scene.AddLayer("info")
-	l.AddItems([]Drawable{
+	l.AddItems([]seker.Drawable{
 		&icon,
 		&temp,
 		&hum,
@@ -203,18 +212,18 @@ func (app *Application) initWeather() {
 
 func (app *Application) initInterior(x int32, y int32) {
 	rect := sdl.Rect{x, y, -1, FONT_SIZE + 2}
-	title := NewText(&rect, "Interior", "#eeeeee")
-	title.SetFont(boldFont)
+	title := seker.NewText(&rect, "Interior", "#eeeeee")
+	title.SetFont(seker.BoldFont)
 
 	rectT := sdl.Rect{x, y + (FONT_SIZE+2)*1, -1, FONT_SIZE + 2}
 	textT := fmt.Sprintf("Temp: %v°", 0)
-	temp := NewText(&rectT, textT, "#eeeeee")
-	temp.SetRules([]HighlightRule{HighlightRule{5, -1, "orange yellow", boldFont}})
+	temp := seker.NewText(&rectT, textT, "#eeeeee")
+	temp.SetRules([]seker.HighlightRule{seker.HighlightRule{5, -1, "orange yellow", seker.BoldFont}})
 
 	rectH := sdl.Rect{x, y + (FONT_SIZE+2)*2, -1, 20}
 	textH := fmt.Sprintf("Humidity: %v", 0)
-	hum := NewText(&rectH, textH, "#eeeeee")
-	hum.SetRules([]HighlightRule{HighlightRule{9, -1, "cornflower", boldFont}})
+	hum := seker.NewText(&rectH, textH, "#eeeeee")
+	hum.SetRules([]seker.HighlightRule{seker.HighlightRule{9, -1, "cornflower", seker.BoldFont}})
 
 	l, _ := app.Scene.AddLayer("interior")
 	l.AddItem(&title)
@@ -250,11 +259,11 @@ func (app *Application) initInterior(x int32, y int32) {
 	}()
 }
 
-func (app *Application) initPinger(title string, x int32, y int32) *Text {
+func (app *Application) initPinger(title string, x int32, y int32) *seker.Text {
 	rect := sdl.Rect{x, y, 100, 20}
 	text := "\uf111"
-	icon := NewText(&rect, text, "gray")
-	label := NewText(&sdl.Rect{x + 30, y, 100, 20}, title, "#eeeeee")
+	icon := seker.NewText(&rect, text, "gray")
+	label := seker.NewText(&sdl.Rect{x + 30, y, 100, 20}, title, "#eeeeee")
 
 	l, _ := app.Scene.AddLayer("pinger_" + title)
 	l.AddItem(&icon)
@@ -264,10 +273,10 @@ func (app *Application) initPinger(title string, x int32, y int32) *Text {
 
 func (app *Application) initClock() {
 	rect := sdl.Rect{330, PADDING_TOP + 30, 100, 20}
-	clock := NewText(&rect, time.Now().Format(`15:04`), "#eeeeee")
-	clock.SetFont(GetFont(boldFont.Name, 60))
+	clock := seker.NewText(&rect, time.Now().Format(`15:04`), "#eeeeee")
+	clock.SetFont(seker.GetFont(seker.BoldFont.Name, 60))
 	rect2 := sdl.Rect{350, PADDING_TOP + 90, 100, 20}
-	date := NewText(&rect2, time.Now().Format(`2 Jan Mon`), "#eeeeee")
+	date := seker.NewText(&rect2, time.Now().Format(`2 Jan Mon`), "#eeeeee")
 	l, _ := app.Scene.AddLayer("clock")
 	l.AddItem(&clock)
 	l.AddItem(&date)

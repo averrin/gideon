@@ -6,11 +6,13 @@ import (
 	"net"
 	"os"
 
-	"github.com/tatsushid/go-fastping"
 	"time"
+
+	"github.com/averrin/seker"
+	"github.com/tatsushid/go-fastping"
 )
 
-func TestConnection(icon *Text, addr string) {
+func TestConnection(icon *seker.Text, addr string) {
 	attempts := 0
 	p := fastping.NewPinger()
 	ra, err := net.ResolveIPAddr("ip4:icmp", addr)
@@ -21,15 +23,15 @@ func TestConnection(icon *Text, addr string) {
 	p.AddIPAddr(ra)
 	p.OnRecv = func(addr *net.IPAddr, rtt time.Duration) {
 		// fmt.Printf("IP Addr: %s receive, RTT: %v\n", addr.String(), rtt)
-		icon.SetRules([]HighlightRule{HighlightRule{0, -1, "pine green", defaultFont}})
+		icon.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "pine green", seker.DefaultFont}})
 		attempts = 0
 	}
 	p.OnIdle = func() {
 		if attempts > 10 {
-			icon.SetRules([]HighlightRule{HighlightRule{0, -1, "red", defaultFont}})
+			icon.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
 			attempts = 0
 		} else if attempts > 5 {
-			icon.SetRules([]HighlightRule{HighlightRule{0, -1, "yellow", defaultFont}})
+			icon.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "yellow", seker.DefaultFont}})
 		}
 		attempts++
 	}
@@ -39,7 +41,7 @@ func TestConnection(icon *Text, addr string) {
 	case <-p.Done():
 		if err := p.Err(); err != nil {
 			log.Printf("Ping failed: %v", err)
-			icon.SetRules([]HighlightRule{HighlightRule{0, -1, "red", defaultFont}})
+			icon.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
 		}
 		// case <-ticker.C:
 		// 	break
