@@ -122,7 +122,7 @@ func (app *Application) run() int {
 			select {
 			case cmd := <-commands:
 				if cmd.Name == "kill" {
-					log.Println("Killed by Shodan")
+					log.Println("Killed by " + cmd.Sender)
 					os.Exit(1)
 				}
 			default:
