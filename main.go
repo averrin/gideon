@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
 	"time"
 
 	"github.com/averrin/seker"
-	sf "github.com/averrin/shodan/modules/sparkfun"
+	ds "github.com/averrin/shodan/modules/datastream"
 	wu "github.com/averrin/shodan/modules/weather"
 	"github.com/spf13/viper"
 	"github.com/veandco/go-sdl2/sdl"
@@ -19,6 +20,7 @@ const PADDING_TOP = 20
 const PADDING_LEFT = 20
 
 var WU wu.WUnderground
+var datastream *ds.DataStream
 var windowed *bool
 var FONT_SIZE int32
 var icons map[string]string
@@ -76,6 +78,7 @@ func (app *Application) run() int {
 	}
 	app.Init("Gideon", uint32(dmode), seker.Geometry{int32(w), int32(h)})
 	defer app.Close()
+	datastream = ds.Connect(viper.GetStringMapString("datastream"))
 
 	seker.LoadFonts(int(FONT_SIZE))
 	app.initWeather()
@@ -87,9 +90,45 @@ func (app *Application) run() int {
 	pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 
 	go TestConnection(pingNetwork, "8.8.8.8")
-	go TestConnection(pingPC, "192.168.1.38")
-	go TestConnection(pingTwin, "192.168.1.36")
+	go TestConnection(pingPC, "onyx.local")
+	go TestConnection(pingTwin, "evil.chip")
 	go app.Scene.Run()
+	datastream.Heartbeat("gideon")
+	shodan := datastream.GetHeartbeat("shodan")
+	pingShodan := app.initPinger("Shodan", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*11)
+	go func() {
+		pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
+		for {
+			select {
+			case ping, ok := <-shodan:
+				if ok {
+					if ping {
+						pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "green", seker.DefaultFont}})
+					} else {
+						pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
+					}
+				} else {
+					pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
+				}
+			default:
+			}
+		}
+		pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
+	}()
+
+	commands := datastream.GetCommands("gideon")
+	go func() {
+		for {
+			select {
+			case cmd := <-commands:
+				if cmd.Name == "kill" {
+					log.Println("Killed by Shodan")
+					os.Exit(1)
+				}
+			default:
+			}
+		}
+	}()
 
 	running := true
 	for running {
@@ -196,27 +235,36 @@ func (app *Application) initInterior(x int32, y int32) {
 	l.AddItem(&title)
 	l.AddItem(&temp)
 	l.AddItem(&hum)
+	errCount := 0
 	go func() {
-		sparkfun := sf.Connect(viper.GetStringMap("sparkfun"))
 		d := 0
 		tick := 0
 		for {
+			log.Print(errCount)
+			if errCount > 5 {
+				temp.SetText(fmt.Sprintf("Temp: --"))
+				hum.SetText(fmt.Sprintf("Humidity: --"))
+				break
+			}
 			time.Sleep(time.Duration(d) * time.Second)
 			outRaw, err := exec.Command("python", "sht21.py").Output()
 			if err != nil {
+				errCount++
 				fmt.Print(err)
 				continue
 			}
 			out := strings.TrimRight(string(outRaw), "\n")
 			data := strings.Split(out, ";")
 			if len(data) != 2 {
+				errCount++
 				fmt.Print(out + ";")
 				continue
 			}
 			temp.SetText(fmt.Sprintf("Temp: %v°", data[0]))
 			hum.SetText(fmt.Sprintf("Humidity: %v%%", data[1]))
+			errCount = 0
 			if tick > 12*5 {
-				sparkfun.SendRoomTemp(data[0], data[1])
+				datastream.SetRoomTemp(data[0], data[1])
 				tick = 0
 			}
 			tick++
