@@ -127,16 +127,22 @@ func (app *Application) run() int {
 		for {
 			select {
 			case cmd := <-commands:
+				log.Println(cmd.Name)
 				if cmd.Name == "kill" {
 					log.Println("Killed by " + cmd.Sender)
 					os.Exit(1)
 				} else if cmd.Name == "pause" || cmd.Name == "play" {
 					eventghost.Send("p/p")
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
+					log.Println("Send to eg: " + cmd.Name[3:])
 					eventghost.Send(cmd.Name[3:])
 				} else if strings.HasPrefix(cmd.Name, "sh:") {
 					tokens := strings.Split(cmd.Name[3:], ":")
-					smarthome.SendCode(smarthome.GetCode(tokens[0], tokens[1]))
+					log.Println("Send to sh: " + cmd.Name[3:])
+					code := smarthome.GetCode(tokens[0], tokens[1])
+					log.Println(code)
+					log.Println(smarthome.GetCodes())
+					smarthome.SendCode(code)
 				}
 			default:
 			}
