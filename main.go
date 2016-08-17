@@ -135,7 +135,7 @@ func (app *Application) run() int {
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
 					eventghost.Send(cmd.Name[3:])
 				} else if strings.HasPrefix(cmd.Name, "sh:") {
-					tokens := strings.Join(cmd.Name[3:], ":")
+					tokens := strings.Split(cmd.Name[3:], ":")
 					smarthome.SendCode(smarthome.GetCode(tokens[0], tokens[1]))
 				}
 			default:
