@@ -24,7 +24,7 @@ const PADDING_LEFT = 20
 var WU wu.WUnderground
 var datastream *ds.DataStream
 var eventghost *eg.EventGhost
-var smarthome *sh.SmartHome
+var smarthome sh.SmartHome
 var windowed *bool
 var FONT_SIZE int32
 var icons map[string]string
