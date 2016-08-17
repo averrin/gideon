@@ -11,6 +11,7 @@ import (
 
 	"github.com/averrin/seker"
 	ds "github.com/averrin/shodan/modules/datastream"
+	eg "github.com/averrin/shodan/modules/eventghost"
 	wu "github.com/averrin/shodan/modules/weather"
 	"github.com/spf13/viper"
 	"github.com/veandco/go-sdl2/sdl"
@@ -21,6 +22,7 @@ const PADDING_LEFT = 20
 
 var WU wu.WUnderground
 var datastream *ds.DataStream
+var eventghost *eg.EventGhost
 var windowed *bool
 var FONT_SIZE int32
 var icons map[string]string
@@ -38,6 +40,7 @@ func main() {
 	FONT_SIZE = int32(viper.GetInt("FONT_SIZE"))
 
 	WU = wu.Connect(viper.GetStringMapString("weather"))
+	eventghost = eg.Connect(viper.GetStringMapString("eventghost"))
 	app := new(Application)
 	os.Exit(app.run())
 }
@@ -124,6 +127,8 @@ func (app *Application) run() int {
 				if cmd.Name == "kill" {
 					log.Println("Killed by " + cmd.Sender)
 					os.Exit(1)
+				} else if cmd.Name == "pause" || cmd.Name == "play" {
+					eventghost.Send("p/p")
 				}
 			default:
 			}
