@@ -12,6 +12,7 @@ import (
 	"github.com/averrin/seker"
 	ds "github.com/averrin/shodan/modules/datastream"
 	eg "github.com/averrin/shodan/modules/eventghost"
+	sh "github.com/averrin/shodan/modules/smarthome"
 	wu "github.com/averrin/shodan/modules/weather"
 	"github.com/spf13/viper"
 	"github.com/veandco/go-sdl2/sdl"
@@ -23,6 +24,7 @@ const PADDING_LEFT = 20
 var WU wu.WUnderground
 var datastream *ds.DataStream
 var eventghost *eg.EventGhost
+var smarthome *sh.SmartHome
 var windowed *bool
 var FONT_SIZE int32
 var icons map[string]string
@@ -41,6 +43,7 @@ func main() {
 
 	WU = wu.Connect(viper.GetStringMapString("weather"))
 	eventghost = eg.Connect(viper.GetStringMapString("eventghost"))
+	smarthome = sh.Connect(viper.GetStringMapString("smarthome"))
 	app := new(Application)
 	os.Exit(app.run())
 }
@@ -129,6 +132,11 @@ func (app *Application) run() int {
 					os.Exit(1)
 				} else if cmd.Name == "pause" || cmd.Name == "play" {
 					eventghost.Send("p/p")
+				} else if strings.HasPrefix(cmd.Name, "eg:") {
+					eventghost.Send(cmd.Name[3:])
+				} else if strings.HasPrefix(cmd.Name, "sh:") {
+					tokens := strings.Join(cmd.Name[3:], ":")
+					smarthome.SendCode(smarthome.GetCode(tokens[0], tokens[1]))
 				}
 			default:
 			}
