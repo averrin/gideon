@@ -129,13 +129,22 @@ func (app *Application) run() int {
 			case cmd := <-commands:
 				log.Println(cmd.Name)
 				if cmd.Name == "kill" {
+					datastream.SendStatus(ds.Status{
+						"gideon", time.Now(), true, nil,
+					})
 					log.Println("Killed by " + cmd.Sender)
 					os.Exit(1)
 				} else if cmd.Name == "pause" || cmd.Name == "play" {
 					eventghost.Send("p/p")
+					datastream.SendStatus(ds.Status{
+						"gideon", time.Now(), true, nil,
+					})
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
 					log.Println("Send to eg: " + cmd.Name[3:])
 					eventghost.Send(cmd.Name[3:])
+					datastream.SendStatus(ds.Status{
+						"gideon", time.Now(), true, nil,
+					})
 				} else if strings.HasPrefix(cmd.Name, "sh:") {
 					tokens := strings.Split(cmd.Name[3:], ":")
 					log.Println("Send to sh: " + cmd.Name[3:])
@@ -143,6 +152,13 @@ func (app *Application) run() int {
 					log.Println(code)
 					log.Println(smarthome.GetCodes())
 					smarthome.SendCode(code)
+					datastream.SendStatus(ds.Status{
+						"gideon", time.Now(), true, nil,
+					})
+				} else {
+					datastream.SendStatus(ds.Status{
+						"gideon", time.Now(), false, nil,
+					})
 				}
 			default:
 			}
