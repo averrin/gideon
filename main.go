@@ -28,6 +28,7 @@ var smarthome sh.SmartHome
 var windowed *bool
 var FONT_SIZE int32
 var icons map[string]string
+var VERSION string
 
 func main() {
 	windowed = flag.Bool("windowed", false, "display in window")
@@ -98,6 +99,11 @@ func (app *Application) run() int {
 	rectV := sdl.Rect{580, 440, 60, 40}
 	textV := fmt.Sprintf("%v", VERSION)
 	ver := seker.NewText(&rectV, textV, "#eeeeee")
+
+	l, _ := app.Scene.AddLayer("version")
+	l.AddItems([]seker.Drawable{
+		&ver,
+	})
 
 	go TestConnection(pingNetwork, "8.8.8.8")
 	go TestConnection(pingPC, "onyx.local")
