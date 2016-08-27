@@ -5,7 +5,7 @@ import unittest
 
 
 class SHT21:
-    """Class to read temperature and humidity from SHT21, much of class was 
+    """Class to read temperature and humidity from SHT21, much of class was
     derived from:
     http://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/Humidity/Sensirion_Humidity_SHT21_Datasheet_V3.pdf
     and Martin Steppuhn's code from http://www.emsystech.de/raspi-sht21"""
@@ -37,7 +37,7 @@ class SHT21:
         self.i2c.write(chr(self._SOFTRESET))
         time.sleep(0.050)
 
-    def read_temperature(self):    
+    def read_temperature(self):
         """Reads the temperature from the sensor.  Not that this call blocks
         for ~86ms to allow the sensor to return the data"""
         self.i2c.write(chr(self._TRIGGER_TEMPERATURE_NO_HOLD))
@@ -46,8 +46,8 @@ class SHT21:
         if self._calculate_checksum(data, 2) == ord(data[2]):
             return self._get_temperature_from_buffer(data)
 
-    def read_humidity(self):    
-        """Reads the humidity from the sensor.  Not that this call blocks 
+    def read_humidity(self):
+        """Reads the humidity from the sensor.  Not that this call blocks
         for ~30ms to allow the sensor to return the data"""
         self.i2c.write(chr(self._TRIGGER_HUMIDITY_NO_HOLD))
         time.sleep(self._HUMIDITY_WAIT_TIME)
@@ -113,7 +113,7 @@ class SHT21:
 
 
 class SHT21Test(unittest.TestCase):
-    """simple sanity test.  Run from the command line with 
+    """simple sanity test.  Run from the command line with
     python -m unittest sht21 to check they are still good"""
 
     def test_temperature(self):
@@ -134,7 +134,7 @@ class SHT21Test(unittest.TestCase):
 
 if __name__ == "__main__":
     try:
-        with SHT21(1) as sht21:
+        with SHT21(2) as sht21:
             print "%s;%s" % (int(sht21.read_temperature()), int(sht21.read_humidity()))
     except IOError, e:
         print e
