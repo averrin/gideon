@@ -101,7 +101,7 @@ func (app *Application) run() int {
 	ver := seker.NewText(&rectV, textV, "#eeeeee")
 
 	l, _ := app.Scene.AddLayer("version")
-	l.AddItem([&ver)
+	l.AddItem(&ver)
 
 	go TestConnection(pingNetwork, "8.8.8.8")
 	go TestConnection(pingPC, "onyx.local")
