@@ -97,11 +97,14 @@ func (app *Application) run() int {
 	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*9)
 	pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 
-	rectV := sdl.Rect{510, 400, -1, 40}
+	rectV := sdl.Rect{500, 400, -1, 40}
 	textV := fmt.Sprintf("%v (%v)", VERSION, SHODAN_VERSION)
 	ver := seker.NewText(&rectV, textV, "#eeeeee")
 
 	l, _ := app.Scene.AddLayer("version")
+	l.SetRules([]seker.HighlightRule{
+		{0, -1, "gray", seker.DefaultFont},
+	})
 	l.AddItem(&ver)
 
 	go TestConnection(pingNetwork, "8.8.8.8")
