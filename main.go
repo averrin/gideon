@@ -97,7 +97,7 @@ func (app *Application) run() int {
 	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*9)
 	pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 
-	rectV := sdl.Rect{540, 400, -1, 40}
+	rectV := sdl.Rect{510, 400, -1, 40}
 	textV := fmt.Sprintf("%v (%v)", VERSION, SHODAN_VERSION)
 	ver := seker.NewText(&rectV, textV, "#eeeeee")
 
@@ -152,7 +152,9 @@ func (app *Application) run() int {
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
 					})
-					err := exec.Command("/home/chip/update.sh").Run()
+					log.Println("updating...")
+					ver.SetText("Updating...")
+					err := exec.Command("/home/chip/update.sh").Start()
 					log.Println(err)
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
 					log.Println("Send to eg: " + cmd.Name[3:])
