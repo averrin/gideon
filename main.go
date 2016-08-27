@@ -29,6 +29,7 @@ var windowed *bool
 var FONT_SIZE int32
 var icons map[string]string
 var VERSION string
+var SHODAN_VERSION string
 
 func main() {
 	windowed = flag.Bool("windowed", false, "display in window")
@@ -97,7 +98,7 @@ func (app *Application) run() int {
 	pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 
 	rectV := sdl.Rect{540, 400, -1, 40}
-	textV := fmt.Sprintf("%v", VERSION)
+	textV := fmt.Sprintf("%v (%v)", VERSION, SHODAN_VERSION)
 	ver := seker.NewText(&rectV, textV, "#eeeeee")
 
 	l, _ := app.Scene.AddLayer("version")
@@ -151,7 +152,8 @@ func (app *Application) run() int {
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
 					})
-					exec.Command("bash", "update.sh").Start()
+					err := exec.Command("/home/chip/update.sh").Run()
+					log.Println(err)
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
 					log.Println("Send to eg: " + cmd.Name[3:])
 					eventghost.Send(cmd.Name[3:])
@@ -287,7 +289,6 @@ func (app *Application) initInterior(x int32, y int32) {
 		d := 0
 		tick := 0
 		for {
-			log.Print(errCount)
 			if errCount > 5 {
 				temp.SetText(fmt.Sprintf("Temp: --"))
 				hum.SetText(fmt.Sprintf("Humidity: --"))
