@@ -95,6 +95,10 @@ func (app *Application) run() int {
 	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*9)
 	pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 
+	rectV := sdl.Rect{580, 440, 60, 40}
+	textV := fmt.Sprintf("%v", VERSION)
+	ver := seker.NewText(&rectV, textV, "#eeeeee")
+
 	go TestConnection(pingNetwork, "8.8.8.8")
 	go TestConnection(pingPC, "onyx.local")
 	go TestConnection(pingTwin, "evil.chip")
@@ -150,7 +154,6 @@ func (app *Application) run() int {
 					log.Println("Send to sh: " + cmd.Name[3:])
 					code := smarthome.GetCode(tokens[0], tokens[1])
 					log.Println(code)
-					log.Println(smarthome.GetCodes())
 					smarthome.SendCode(code)
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
