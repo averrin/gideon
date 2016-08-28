@@ -156,18 +156,32 @@ func (app *Application) run() int {
 					// outRaw, err := p.Output()
 					cmd := exec.Command("/home/chip/update.sh")
 					cmdReader, err := cmd.StdoutPipe()
+					cmdErrReader, err2 := cmd.StderrPipe()
 					if err != nil {
 						fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
 						os.Exit(1)
 					}
 
 					scanner := bufio.NewScanner(cmdReader)
+					scannerErr := bufio.NewScanner(cmdErrReader)
 					go func() {
 						for scanner.Scan() {
 							t := scanner.Text()
 							fmt.Printf("update >>> %s\n", t)
 						}
 					}()
+					go func() {
+						for scannerErr.Scan() {
+							t := scannerErr.Text()
+							fmt.Printf("error >>> %s\n", t)
+						}
+					}()
+					err = cmd.Wait()
+					ver.SetText(fmt.Sprintf("%v (%v)", VERSION, SHODAN_VERSION))
+					if err != nil {
+						fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
+						os.Exit(1)
+					}
 					if err != nil {
 						datastream.SendStatus(ds.Status{
 							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
