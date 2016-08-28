@@ -109,7 +109,7 @@ func (app *Application) run() int {
 	l.AddItem(&ver)
 
 	rectN := sdl.Rect{300, PADDING_TOP + 120, -1, 20}
-	noti = seker.NewText(&rectN, "", "#eeeeee")
+	noti = seker.NewText(&rectN, "test", "#eeeeee")
 
 	l, _ = app.Scene.AddLayer("notification")
 	// ver.SetRules([]seker.HighlightRule{
@@ -161,8 +161,11 @@ func (app *Application) run() int {
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
 					})
-				} else if cmd.Name == "noti" {
-					noti.SetText(cmd.Args["message"].(string))
+				} else if cmd.Name == "notify" {
+					log.Println("Notification")
+					msg := cmd.Args["message"].(string)
+					log.Println(msg)
+					noti.SetText(msg)
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
 					})
