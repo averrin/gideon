@@ -9,7 +9,7 @@ cd ~/gideon_src/src/github.com/averrin/seker;
 git pull;
 cd -;
 ./build.sh;
-killall `ps -aux | grep start.sh | grep -v grep | awk '{ print $1 }'`
+killall `ps -aux | grep start.sh | grep -v grep | awk '{ print $2 }'`
 killall gideon
 sleep 1
 cp ./gideon ~;
