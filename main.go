@@ -169,7 +169,7 @@ func (app *Application) run() int {
 						"gideon", time.Now(), true, nil,
 					})
 					go func() {
-						time.Sleep(5 * time.Minute)
+						time.Sleep(1 * time.Hour)
 						noti.SetText(" ")
 					}()
 				} else if cmd.Name == "update" {
