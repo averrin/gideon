@@ -108,8 +108,8 @@ func (app *Application) run() int {
 	})
 	l.AddItem(&ver)
 
-	rectN := sdl.Rect{300, PADDING_TOP + 120, -1, 20}
-	noti = seker.NewText(&rectN, "test", "#eeeeee")
+	rectN := sdl.Rect{300, PADDING_TOP + 130, -1, 20}
+	noti = seker.NewText(&rectN, " ", "#eeeeee")
 
 	l, _ = app.Scene.AddLayer("notification")
 	// ver.SetRules([]seker.HighlightRule{
@@ -125,23 +125,22 @@ func (app *Application) run() int {
 	shodan := datastream.GetHeartbeat("shodan")
 	pingShodan := app.initPinger("Shodan", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*11)
 	go func() {
-		pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
+		pingShodan.SetRules([]seker.HighlightRule{{0, -1, "red", seker.DefaultFont}})
 		for {
 			select {
 			case ping, ok := <-shodan:
 				if ok {
 					if ping {
-						pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "green", seker.DefaultFont}})
+						pingShodan.SetRules([]seker.HighlightRule{{0, -1, "green", seker.DefaultFont}})
 					} else {
-						pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
+						pingShodan.SetRules([]seker.HighlightRule{{0, -1, "red", seker.DefaultFont}})
 					}
 				} else {
-					pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
+					pingShodan.SetRules([]seker.HighlightRule{{0, -1, "red", seker.DefaultFont}})
 				}
 			default:
 			}
 		}
-		pingShodan.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "red", seker.DefaultFont}})
 	}()
 
 	commands := datastream.GetCommands("gideon")
@@ -169,17 +168,21 @@ func (app *Application) run() int {
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
 					})
+					go func() {
+						time.Sleep(5 * time.Minute)
+						noti.SetText(" ")
+					}()
 				} else if cmd.Name == "update" {
 					log.Println("updating...")
 					ver.SetText("Updating...")
 					err := exec.Command("/home/chip/update.sh").Start()
 					if err != nil {
 						datastream.SendStatus(ds.Status{
-							"gideon", time.Now(), true, nil,
+							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
 						})
 					} else {
 						datastream.SendStatus(ds.Status{
-							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
+							"gideon", time.Now(), true, nil,
 						})
 					}
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
@@ -192,7 +195,7 @@ func (app *Application) run() int {
 					tokens := strings.Split(cmd.Name[3:], ":")
 					log.Println("Send to sh: " + cmd.Name[3:])
 					code := smarthome.GetCode(tokens[0], tokens[1])
-					log.Println(code)
+					// log.Println(code)
 					smarthome.SendCode(code)
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
@@ -211,16 +214,11 @@ func (app *Application) run() int {
 	for running {
 		var event sdl.Event
 		for event = sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-			// fmt.Print(".")
 			ret := 1
 			switch t := event.(type) {
 			case *sdl.QuitEvent:
 				ret = 0
 			case *sdl.KeyDownEvent:
-				// fmt.Printf("[%d ms] Keyboard\ttype:%d\tsym:%s\tmodifiers:%d\tstate:%d\trepeat:%d\n",
-				// t.Timestamp, t.Type, sdl.GetScancodeName(t.Keysym.Scancode), t.Keysym.Mod, t.State, t.Repeat)
-				// key := sdl.GetScancodeName(t.Keysym.Scancode)
-				// log.Println(key)
 				if t.Keysym.Sym == sdl.K_ESCAPE || t.Keysym.Sym == sdl.K_CAPSLOCK {
 					ret = 0
 				}
@@ -248,17 +246,17 @@ func (app *Application) initWeather() {
 		text = fmt.Sprintf("Temp: %v°", weather.TempC)
 	}
 	temp := seker.NewText(&rect, text, "#eeeeee")
-	temp.SetRules([]seker.HighlightRule{seker.HighlightRule{5, -1, "orange yellow", seker.BoldFont}})
+	temp.SetRules([]seker.HighlightRule{{5, -1, "orange yellow", seker.BoldFont}})
 
 	rectH := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*1, -1, 20}
 	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
 	hum := seker.NewText(&rectH, textH, "#eeeeee")
-	hum.SetRules([]seker.HighlightRule{seker.HighlightRule{9, -1, "cornflower", seker.BoldFont}})
+	hum.SetRules([]seker.HighlightRule{{9, -1, "cornflower", seker.BoldFont}})
 
 	rectW := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*2, -1, 20}
 	textW := fmt.Sprintf("%v", weather.Weather)
 	wea := seker.NewText(&rectW, textW, "#eeeeee")
-	wea.SetRules([]seker.HighlightRule{seker.HighlightRule{0, -1, "#eeeeee", seker.BoldFont}})
+	wea.SetRules([]seker.HighlightRule{{0, -1, "#eeeeee", seker.BoldFont}})
 
 	blank := wu.Weather{}
 	go func() {
@@ -301,12 +299,12 @@ func (app *Application) initInterior(x int32, y int32) {
 	rectT := sdl.Rect{x, y + (FONT_SIZE+2)*1, -1, FONT_SIZE + 2}
 	textT := fmt.Sprintf("Temp: %v°", 0)
 	temp := seker.NewText(&rectT, textT, "#eeeeee")
-	temp.SetRules([]seker.HighlightRule{seker.HighlightRule{5, -1, "orange yellow", seker.BoldFont}})
+	temp.SetRules([]seker.HighlightRule{{5, -1, "orange yellow", seker.BoldFont}})
 
 	rectH := sdl.Rect{x, y + (FONT_SIZE+2)*2, -1, 20}
 	textH := fmt.Sprintf("Humidity: %v", 0)
 	hum := seker.NewText(&rectH, textH, "#eeeeee")
-	hum.SetRules([]seker.HighlightRule{seker.HighlightRule{9, -1, "cornflower", seker.BoldFont}})
+	hum.SetRules([]seker.HighlightRule{{9, -1, "cornflower", seker.BoldFont}})
 
 	l, _ := app.Scene.AddLayer("interior")
 	l.AddItem(&title)
