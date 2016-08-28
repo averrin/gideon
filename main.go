@@ -177,17 +177,22 @@ func (app *Application) run() int {
 							fmt.Printf("error >>> %s\n", t)
 						}
 					}()
+					err = cmd.Start()
+					if err != nil {
+						fmt.Fprintln(os.Stderr, "Error starting Cmd", err)
+						datastream.SendStatus(ds.Status{
+							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
+						})
+					}
 					err = cmd.Wait()
 					ver.SetText(fmt.Sprintf("%v (%v)", VERSION, SHODAN_VERSION))
 					if err != nil {
 						fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
-						os.Exit(1)
-					}
-					if err != nil {
 						datastream.SendStatus(ds.Status{
 							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
 						})
-					} else {
+					}
+					if err == nil {
 						datastream.SendStatus(ds.Status{
 							"gideon", time.Now(), true, nil,
 						})
