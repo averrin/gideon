@@ -176,7 +176,7 @@ func (app *Application) run() int {
 						})
 					} else {
 						datastream.SendStatus(ds.Status{
-							"gideon", time.Now(), false, string(err),
+							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
 						})
 					}
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
