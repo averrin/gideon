@@ -157,8 +157,9 @@ func (app *Application) run() int {
 					cmd := exec.Command("/home/chip/update.sh")
 					cmdReader, err := cmd.StdoutPipe()
 					cmdErrReader, err2 := cmd.StderrPipe()
-					if err != nil {
+					if err != nil || err2 != nil {
 						fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
+						fmt.Fprintln(os.Stderr, "Error creating StderrPipe for Cmd", err2)
 						os.Exit(1)
 					}
 
