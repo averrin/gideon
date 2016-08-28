@@ -30,6 +30,7 @@ var FONT_SIZE int32
 var icons map[string]string
 var VERSION string
 var SHODAN_VERSION string
+var noti seker.Text
 
 func main() {
 	windowed = flag.Bool("windowed", false, "display in window")
@@ -107,6 +108,15 @@ func (app *Application) run() int {
 	})
 	l.AddItem(&ver)
 
+	rectN := sdl.Rect{300, PADDING_TOP + 120, -1, 20}
+	noti = seker.NewText(&rectN, "", "#eeeeee")
+
+	l, _ = app.Scene.AddLayer("notification")
+	// ver.SetRules([]seker.HighlightRule{
+	// 	{0, -1, "gray", seker.DefaultFont},
+	// })
+	l.AddItem(&noti)
+
 	go TestConnection(pingNetwork, "8.8.8.8")
 	go TestConnection(pingPC, "onyx.local")
 	go TestConnection(pingTwin, "evil.chip")
@@ -151,14 +161,24 @@ func (app *Application) run() int {
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
 					})
-				} else if cmd.Name == "update" {
+				} else if cmd.Name == "noti" {
+					noti.SetText(cmd.Args["message"].(string))
 					datastream.SendStatus(ds.Status{
 						"gideon", time.Now(), true, nil,
 					})
+				} else if cmd.Name == "update" {
 					log.Println("updating...")
 					ver.SetText("Updating...")
 					err := exec.Command("/home/chip/update.sh").Start()
-					log.Println(err)
+					if err != nil {
+						datastream.SendStatus(ds.Status{
+							"gideon", time.Now(), true, nil,
+						})
+					} else {
+						datastream.SendStatus(ds.Status{
+							"gideon", time.Now(), false, string(err),
+						})
+					}
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
 					log.Println("Send to eg: " + cmd.Name[3:])
 					eventghost.Send(cmd.Name[3:])
