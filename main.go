@@ -96,18 +96,15 @@ func (app *Application) run() int {
 
 	pingNetwork := app.initPinger("Network", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*8)
 	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*9)
-	pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
+	// pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 
-	rectV := sdl.Rect{490, 400, -1, 40}
+	rectV := sdl.Rect{505, 400, -1, 40}
 	textV := fmt.Sprintf("%v (%v)", VERSION, SHODAN_VERSION)
-	ver := seker.NewText(&rectV, textV, "#eeeeee")
+	ver := seker.NewText(&rectV, textV, "gray")
 
 	l, _ := app.Scene.AddLayer("version")
-	vf := seker.GetFont(seker.DefaultFont.Name, 20)
+	vf := seker.GetFont(seker.DefaultFont.Name, 18)
 	ver.SetFont(vf)
-	ver.SetRules([]seker.HighlightRule{
-		{0, -1, "gray", vf},
-	})
 	l.AddItem(&ver)
 
 	rectN := sdl.Rect{300, PADDING_TOP + 130, -1, 20}
@@ -121,11 +118,11 @@ func (app *Application) run() int {
 
 	go TestConnection(pingNetwork, "8.8.8.8")
 	go TestConnection(pingPC, "onyx.local")
-	go TestConnection(pingTwin, "evil.chip")
+	// go TestConnection(pingTwin, "evil.chip")
 	go app.Scene.Run()
 	datastream.Heartbeat("gideon")
 	shodan := datastream.GetHeartbeat("shodan")
-	pingShodan := app.initPinger("Shodan", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*11)
+	pingShodan := app.initPinger("Shodan", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 	go func() {
 		pingShodan.SetRules([]seker.HighlightRule{{0, -1, "red", seker.DefaultFont}})
 		for {
