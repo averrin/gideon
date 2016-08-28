@@ -103,6 +103,7 @@ func (app *Application) run() int {
 	ver := seker.NewText(&rectV, textV, "#eeeeee")
 
 	l, _ := app.Scene.AddLayer("version")
+	ver.SetFont(seker.GetFont(seker.DefaultFont.Name, 10))
 	ver.SetRules([]seker.HighlightRule{
 		{0, -1, "gray", seker.DefaultFont},
 	})
