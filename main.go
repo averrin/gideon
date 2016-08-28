@@ -160,7 +160,9 @@ func (app *Application) run() int {
 					if err != nil || err2 != nil {
 						fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
 						fmt.Fprintln(os.Stderr, "Error creating StderrPipe for Cmd", err2)
-						os.Exit(1)
+						datastream.SendStatus(ds.Status{
+							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
+						})
 					}
 
 					scanner := bufio.NewScanner(cmdReader)
@@ -184,18 +186,13 @@ func (app *Application) run() int {
 							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
 						})
 					}
+					datastream.SendStatus(ds.Status{
+						"gideon", time.Now(), true, nil,
+					})
 					err = cmd.Wait()
 					ver.SetText(fmt.Sprintf("%v (%v)", VERSION, SHODAN_VERSION))
 					if err != nil {
 						fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
-						datastream.SendStatus(ds.Status{
-							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
-						})
-					}
-					if err == nil {
-						datastream.SendStatus(ds.Status{
-							"gideon", time.Now(), true, nil,
-						})
 					}
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
 					log.Println("Send to eg: " + cmd.Name[3:])
