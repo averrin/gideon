@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"log"
@@ -151,8 +152,22 @@ func (app *Application) run() int {
 				} else if cmd.Name == "update" {
 					log.Println("updating...")
 					ver.SetText("Updating...")
-					p := exec.Command("/home/chip/update.sh")
-					outRaw, err := p.Output()
+					// p := exec.Command("/home/chip/update.sh")
+					// outRaw, err := p.Output()
+					cmd := exec.Command("/home/chip/update.sh")
+					cmdReader, err := cmd.StdoutPipe()
+					if err != nil {
+						fmt.Fprintln(os.Stderr, "Error creating StdoutPipe for Cmd", err)
+						os.Exit(1)
+					}
+
+					scanner := bufio.NewScanner(cmdReader)
+					go func() {
+						for scanner.Scan() {
+							t := scanner.Text()
+							fmt.Printf("update >>> %s\n", t)
+						}
+					}()
 					if err != nil {
 						datastream.SendStatus(ds.Status{
 							"gideon", time.Now(), false, fmt.Sprintf("%s", err),
@@ -337,6 +352,7 @@ func (app *Application) initPinger(title string, x int32, y int32) *seker.Text {
 	text := "\uf111"
 	icon := seker.NewText(&rect, text, "gray")
 	label := seker.NewText(&sdl.Rect{x + 30, y, 100, 20}, title, "#eeeeee")
+	label.SetFont(seker.GetFont(seker.DefaultFont.Name, FONT_SIZE))
 
 	l, _ := app.Scene.AddLayer("pinger_" + title)
 	l.AddItem(&icon)
