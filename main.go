@@ -98,14 +98,15 @@ func (app *Application) run() int {
 	pingPC := app.initPinger("PC", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*9)
 	pingTwin := app.initPinger("Evil twin", PADDING_LEFT, PADDING_TOP+90+(FONT_SIZE+2)*10)
 
-	rectV := sdl.Rect{500, 400, -1, 40}
+	rectV := sdl.Rect{490, 400, -1, 40}
 	textV := fmt.Sprintf("%v (%v)", VERSION, SHODAN_VERSION)
 	ver := seker.NewText(&rectV, textV, "#eeeeee")
 
 	l, _ := app.Scene.AddLayer("version")
-	ver.SetFont(seker.GetFont(seker.DefaultFont.Name, 10))
+	vf := seker.GetFont(seker.DefaultFont.Name, 20)
+	ver.SetFont(vf)
 	ver.SetRules([]seker.HighlightRule{
-		{0, -1, "gray", seker.DefaultFont},
+		{0, -1, "gray", vf},
 	})
 	l.AddItem(&ver)
 
