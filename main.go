@@ -194,6 +194,8 @@ func (app *Application) run() int {
 					if err != nil {
 						fmt.Fprintln(os.Stderr, "Error waiting for Cmd", err)
 					}
+					log.Println("restarting...")
+					exec.Command("/home/chip/start.sh").Start()
 				} else if strings.HasPrefix(cmd.Name, "eg:") {
 					log.Println("Send to eg: " + cmd.Name[3:])
 					eventghost.Send(cmd.Name[3:])

@@ -8,4 +8,4 @@ cd -;
 cd ~/gideon_src/src/github.com/averrin/seker;
 git pull;
 cd -;
-./build.sh && ~/start.sh
+./build.sh
