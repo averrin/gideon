@@ -238,7 +238,7 @@ func (app *Application) initWeather() {
 		text = fmt.Sprintf("Temp: %v°", weather.TempC)
 	}
 	temp := seker.NewText(&rect, text, "#eeeeee")
-	temp.SetFont(seker.GetFont(seker.DefaultFont.Name, FONT_SIZE))
+	temp.SetFont(seker.GetFont(seker.DefaultFont.Name, int(FONT_SIZE)))
 
 	temp.SetRules([]seker.HighlightRule{{5, -1, "orange yellow", seker.BoldFont}})
 
@@ -246,13 +246,13 @@ func (app *Application) initWeather() {
 	textH := fmt.Sprintf("Humidity: %v", weather.RelativeHumidity)
 	hum := seker.NewText(&rectH, textH, "#eeeeee")
 	hum.SetRules([]seker.HighlightRule{{9, -1, "cornflower", seker.BoldFont}})
-	hum.SetFont(seker.GetFont(seker.DefaultFont.Name, FONT_SIZE))
+	hum.SetFont(seker.GetFont(seker.DefaultFont.Name, int(FONT_SIZE)))
 
 	rectW := sdl.Rect{PADDING_LEFT, PADDING_TOP + 90 + (FONT_SIZE+2)*2, -1, 20}
 	textW := fmt.Sprintf("%v", weather.Weather)
 	wea := seker.NewText(&rectW, textW, "#eeeeee")
 	wea.SetRules([]seker.HighlightRule{{0, -1, "#eeeeee", seker.BoldFont}})
-	wea.SetFont(seker.GetFont(seker.BoldFont.Name, FONT_SIZE))
+	wea.SetFont(seker.GetFont(seker.BoldFont.Name, int(FONT_SIZE)))
 
 	blank := wu.Weather{}
 	go func() {
@@ -291,19 +291,19 @@ func (app *Application) initInterior(x int32, y int32) {
 	rect := sdl.Rect{x, y, -1, FONT_SIZE + 2}
 	title := seker.NewText(&rect, "Interior", "#eeeeee")
 	title.SetFont(seker.BoldFont)
-	title.SetFont(seker.GetFont(seker.BoldFont.Name, FONT_SIZE))
+	title.SetFont(seker.GetFont(seker.BoldFont.Name, int(FONT_SIZE)))
 
 	rectT := sdl.Rect{x, y + (FONT_SIZE+2)*1, -1, FONT_SIZE + 2}
 	textT := fmt.Sprintf("Temp: %v°", 0)
 	temp := seker.NewText(&rectT, textT, "#eeeeee")
 	temp.SetRules([]seker.HighlightRule{{5, -1, "orange yellow", seker.BoldFont}})
-	temp.SetFont(seker.GetFont(seker.DefaultFont.Name, FONT_SIZE))
+	temp.SetFont(seker.GetFont(seker.DefaultFont.Name, int(FONT_SIZE)))
 
 	rectH := sdl.Rect{x, y + (FONT_SIZE+2)*2, -1, 20}
 	textH := fmt.Sprintf("Humidity: %v", 0)
 	hum := seker.NewText(&rectH, textH, "#eeeeee")
 	hum.SetRules([]seker.HighlightRule{{9, -1, "cornflower", seker.BoldFont}})
-	hum.SetFont(seker.GetFont(seker.DefaultFont.Name, FONT_SIZE))
+	hum.SetFont(seker.GetFont(seker.DefaultFont.Name, int(FONT_SIZE)))
 
 	l, _ := app.Scene.AddLayer("interior")
 	l.AddItem(&title)
@@ -352,7 +352,7 @@ func (app *Application) initPinger(title string, x int32, y int32) *seker.Text {
 	text := "\uf111"
 	icon := seker.NewText(&rect, text, "gray")
 	label := seker.NewText(&sdl.Rect{x + 30, y, 100, 20}, title, "#eeeeee")
-	label.SetFont(seker.GetFont(seker.DefaultFont.Name, FONT_SIZE))
+	label.SetFont(seker.GetFont(seker.DefaultFont.Name, int(FONT_SIZE)))
 
 	l, _ := app.Scene.AddLayer("pinger_" + title)
 	l.AddItem(&icon)
