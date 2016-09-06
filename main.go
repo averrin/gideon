@@ -280,6 +280,7 @@ func (app *Application) initWeather() {
 			// sdl.Delay(5 * 1000 * 60)
 			time.Sleep(5 * time.Minute)
 			fmt.Print("wu-")
+			var err error
 			weather, err = WU.GetWeather()
 			if weather != blank || err != nil {
 				text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
