@@ -243,7 +243,8 @@ func (app *Application) run() int {
 }
 
 func (app *Application) initWeather() {
-	weather := WU.GetWeather()
+	weather, _ := WU.GetWeather()
+	
 
 	rectI := sdl.Rect{30, PADDING_TOP, 100, 100}
 	textI := icons[weather.Icon]
@@ -279,8 +280,8 @@ func (app *Application) initWeather() {
 			// sdl.Delay(5 * 1000 * 60)
 			time.Sleep(5 * time.Minute)
 			fmt.Print("wu-")
-			weather = WU.GetWeather()
-			if weather != blank {
+			weather, err = WU.GetWeather()
+			if weather != blank || err != nil {
 				text := fmt.Sprintf("Temp: %v° (%s°)", weather.TempC, weather.FeelslikeC)
 				if fmt.Sprintf("%v", weather.TempC) == weather.FeelslikeC || weather.FeelslikeC == "" {
 					text = fmt.Sprintf("Temp: %v°", weather.TempC)
